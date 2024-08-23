@@ -13,8 +13,8 @@ namespace DataModels.ApplicationModels
         public string CompanyName { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public string JobDescription { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string ReasonForLeaving { get; set; } = string.Empty;
         public string ContractType { get; set; } = string.Empty;
         public string TypeOfEmployment { get; set; } = string.Empty;

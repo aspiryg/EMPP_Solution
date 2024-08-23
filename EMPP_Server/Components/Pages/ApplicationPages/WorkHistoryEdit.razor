@@ -1,0 +1,135 @@
+﻿@page "/workhistory/edit/{id:int}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Components.Pages.Comp
+@using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject IWorkHistoryRepo _work
+@inject IMainInfoRepo _main
+@inject IJSRuntime _js
+@inject NavigationManager _nav
+@inject ISnackbar _snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Work History</PageTitle>
+
+@if (IsLoading)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <MudAlert IsOpen="@IsLoading" Severity="Severity.Info">Loading...</MudAlert>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <main class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <MudPaper Elevation="4" Class="p-3">
+                    <MudGrid Justify="Justify.SpaceAround">
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.h5">Application: @Application.FirstName @Application.LastName</MudText>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="AddWork">Add Work</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                    <MudTable Items="@WorkHistories" Dense="true" Hover="true" Bordered="true" Striped="true">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">Work History</MudText>
+                            <MudSpacer />
+                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>Company Name</MudTh>
+                            <MudTh>Position</MudTh>
+                            <MudTh>Start Date</MudTh>
+                            <MudTh>End Date</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.CompanyName</MudTd>
+                            <MudTd>@context.Position</MudTd>
+                            <MudTd>@context.StartDate</MudTd>
+                            <MudTd>@context.EndDate</MudTd>
+                            <MudTd>
+                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" OnClick="() => DeleteWorkHistory(context.Id)">Delete</MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </div>
+        </div>
+    </main>
+
+}
+
+
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public bool IsLoading { get; set; } = false;
+
+    public string searchString1 { get; set; }
+
+    public WorkHistoryDTO WorkHistory { get; set; } = new WorkHistoryDTO();
+
+    public IEnumerable<WorkHistoryDTO> WorkHistories = new List<WorkHistoryDTO>();
+
+    public MainInfoDTO Application { get; set; } = new MainInfoDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        await LoadApplication();
+        await LoadWorkHistory();
+        IsLoading = false;
+    }
+
+    private async Task LoadApplication()
+    {
+        Application = await _main.GetMainInfoById(Id);
+    }
+
+    private async Task LoadWorkHistory()
+    {
+        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(Id);
+    }
+
+    private async Task DeleteWorkHistory(int id)
+    {
+        var confirm = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirm)
+        {
+            await _work.DeleteWorkHistoryAsync(id);
+            await LoadWorkHistory();
+        }
+    }
+
+    // open dialog
+    private async Task AddWork()
+    {
+        var parameters = new DialogParameters<AddWork>
+        {
+            { x => x.AppId, Id},
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddWork>("Add Work", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadWorkHistory();
+            _snackbar.Add("Work History Added", Severity.Success);
+        }
+
+    }
+}

@@ -1,0 +1,243 @@
+﻿@page "/application/create"
+@page "/application/edit/{id:int}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+
+
+@inject IMainInfoRepo _MainInfo
+@inject IGeneInfo _GeneInfo
+@inject NavigationManager _nav
+@inject ISnackbar _Snack
+
+<PageTitle>Application @(IsNew ? "Add" : "Edit")</PageTitle>
+
+@if (IsLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@MainInfo" OnValidSubmit="SaveApplication">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Main Information</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="First Name" @bind-Value="MainInfo.FirstName" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.FirstName)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Last Name" @bind-Value="MainInfo.LastName" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.LastName)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Middle Name" @bind-Value="MainInfo.MiddleName" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.MiddleName)" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Gender" @bind-Value="MainInfo.Gender" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("Male")" />
+                            <MudSelectItem Value="@("Female")" />
+                            <MudSelectItem Value="@("Other")" />
+                        </MudSelect>
+                        <ValidationMessage For="@(() => MainInfo.Gender)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="Date of Birth" @bind-Date="MainInfo.DateOfBirth" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.DateOfBirth)" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Contact Information</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Email" @bind-Value="MainInfo.Email" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.Email)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Phone Number" @bind-Value="MainInfo.Phone" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.Phone)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="WhatsApp" @bind-Value="MainInfo.WhatsApp" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.WhatsApp)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        @*Empty*@
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Country Of Residence</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Country" @bind-Value="MainInfo.COR" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (var item in CountryList)
+                            {
+                                <MudSelectItem Value="@item" />
+                            }
+                        </MudSelect>
+                        <ValidationMessage For="@(() => MainInfo.COR)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="Date Of Entry" @bind-Date="MainInfo.DateOfEntry" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.DateOfEntry)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Passport Number" @bind-Value="MainInfo.PassportNumber" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.PassportNumber)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Passport Expiry" @bind-Value="MainInfo.PassportExpiry" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.PassportExpiry)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Address Line 1" @bind-Value="MainInfo.AddressLine1" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.AddressLine1)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Address Line 2" @bind-Value="MainInfo.AddressLine2" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.AddressLine2)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="City" @bind-Value="MainInfo.City" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.City)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="State" @bind-Value="MainInfo.State" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.State)" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Label="Postal Code" @bind-Value="MainInfo.PostalCode" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => MainInfo.PostalCode)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        @*Empty*@
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Nationality</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Nationality" @bind-Value="MainInfo.Nationality" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (var item in CountryList)
+                            {
+                                <MudSelectItem Value="@item" />
+                            }
+                        </MudSelect>
+                        <ValidationMessage For="@(() => MainInfo.Nationality)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Country Of Birth" @bind-Value="MainInfo.CountryOfBirth" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (var item in CountryList)
+                            {
+                                <MudSelectItem Value="@item" />
+                            }
+                        </MudSelect>
+                        <ValidationMessage For="@(() => MainInfo.CountryOfBirth)" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                <MudGrid Justify="Justify.FlexEnd" Class="justify-content-center">  
+                    <MudItem>
+                        <button type="submit" class="btn btn-primary">Next</button>
+                    </MudItem>
+                    <MudItem>
+                        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                    </MudItem>
+                </MudGrid>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public bool IsNew => Id == 0;
+    public bool IsLoading { get; set; } = false;
+
+    public MainInfoDTO MainInfo { get; set; } = new MainInfoDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        await LoadApplication();
+        await GetCountryNamesAsync();
+        IsLoading = false;
+    }
+
+    public async Task LoadApplication()
+    {
+        if (IsNew)
+        {
+            MainInfo = new MainInfoDTO();
+        }
+        else
+        {
+            MainInfo = await _MainInfo.GetMainInfoById(Id);
+        }
+    }
+
+    public async Task SaveApplication()
+    {
+        if (IsNew)
+        {
+            await _MainInfo.AddMainInfo(MainInfo);
+        }
+        else
+        {
+            await _MainInfo.UpdateMainInfo(MainInfo);
+        }
+
+        var lastId = await _MainInfo.GetLastApplicationId();
+        // Navigate to the work history page
+        _nav.NavigateTo($"/workhistory/edit/{lastId}");
+        // Success message
+        _Snack.Add("Application saved successfully", Severity.Success);
+    }
+
+    public void Cancel()
+    {
+        _nav.NavigateTo("/applications");        
+    }
+
+
+    // list of Gender
+    private List<string> GenderList = new List<string> { "Male", "Female", "Other" };
+
+    // List of Country from API https://restcountries.com/v3.1/all
+
+    public new List<string> CountryList { get; set; } = new List<string>();
+
+    public async Task GetCountryNamesAsync()
+    {
+        CountryList = await _GeneInfo.GetALLCountries();
+    }
+
+}

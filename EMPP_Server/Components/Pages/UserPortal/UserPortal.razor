@@ -1,0 +1,93 @@
+﻿@page "/myPortal"
+@page "/userPortal/{userId}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject IMainInfoRepo _main
+@inject NavigationManager _nav
+@inject IWorkHistoryRepo _work
+@inject ISnackbar _snackbar
+
+
+<PageTitle>User Portal</PageTitle>
+
+@if (IsLoading)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <MudAlert IsOpen="@IsLoading" Severity="Severity.Info">Loading...</MudAlert>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <main class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <MudPaper Elevation="4" Class="p-3">
+                    <MudGrid Justify="Justify.SpaceAround">
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.h5">Application: @Application.FirstName @Application.LastName</MudText>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Add Work</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                    <MudTable Items="@WorkHistories" Dense="true" Hover="true" Bordered="true" Striped="true">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">Work History</MudText>
+                            <MudSpacer />
+                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>Company Name</MudTh>
+                            <MudTh>Position</MudTh>
+                            <MudTh>Start Date</MudTh>
+                            <MudTh>End Date</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.CompanyName</MudTd>
+                            <MudTd>@context.Position</MudTd>
+                            <MudTd>@context.StartDate</MudTd>
+                            <MudTd>@context.EndDate</MudTd>
+                            <MudTd>
+                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Delete</MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </div>
+        </div>
+    </main>
+}
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+
+    public string searchString1 { get; set; }
+
+    public List<WorkHistoryDTO> WorkHistories { get; set; } = new List<WorkHistoryDTO>();
+
+    public bool IsLoading { get; set; } = false;
+
+    public MainInfoDTO Application { get; set; } = new MainInfoDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Application = await _main.GetMainInfoByUserId(userId);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+    }
+
+    public async Task LoadApplication()
+    {
+        Application = await _main.GetMainInfoByUserId(userId);
+    }
+}

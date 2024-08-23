@@ -1,0 +1,96 @@
+﻿@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject IWorkHistoryRepo _workHistory
+
+<MudDialog>
+    <TitleContent>
+      <MudText Typo="Typo.h5">Add Work Experience</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="WorkHistory" OnValidSubmit="AddWorkRecord">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudTextField Label="Company Name" @bind-Value="WorkHistory.CompanyName" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.CompanyName)" />
+            <MudTextField Label="Position" @bind-Value="WorkHistory.Position" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.Position)" />
+            <MudTextField Lines="5" AutoGrow Label="Job Description" @bind-Value="WorkHistory.JobDescription" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.JobDescription)" />
+            <MudDatePicker Label="Start Date" @bind-Date="WorkHistory.StartDate" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.StartDate)" />
+            <MudDatePicker Label="End Date" @bind-Date="WorkHistory.EndDate" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.EndDate)" />
+            <MudTextField Label="Reason For Leaving" @bind-Value="WorkHistory.ReasonForLeaving" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.ReasonForLeaving)" />
+            <MudSelect Label="Contract Type" @bind-Value="WorkHistory.ContractType" Variant="MudBlazor.Variant.Outlined">
+                <MudSelectItem Value=@("Permanent") Label="Permanent" />
+                <MudSelectItem Value=@("Contract") Label="Contract" />
+                <MudSelectItem Value=@("Internship") Label="Internship" />
+                <MudSelectItem Value=@("Other") Label="Part-Time" />
+            </MudSelect>
+            <ValidationMessage For="@(() => WorkHistory.ContractType)" />
+
+            <MudSelect Label="Type Of Employment" @bind-Value="WorkHistory.TypeOfEmployment" Variant="MudBlazor.Variant.Outlined">
+                <MudSelectItem Value=@("Full-Time") Label="Full-Time" />
+                <MudSelectItem Value=@("Part-Time") Label="Part-Time" />
+                <MudSelectItem Value=@("Casual") Label="Casual" />
+                <MudSelectItem Value=@("Other") Label="Other" />
+            </MudSelect>
+            <ValidationMessage For="@(() => WorkHistory.TypeOfEmployment)" />
+
+            <MudTextField Label="Address Line 1" @bind-Value="WorkHistory.AddressLine1" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.AddressLine1)" />
+            <MudTextField Label="Address Line 2" @bind-Value="WorkHistory.AddressLine2" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.AddressLine2)" />
+            <MudTextField Label="City" @bind-Value="WorkHistory.City" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.City)" />
+            <MudTextField Label="State" @bind-Value="WorkHistory.State" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.State)" />
+            <MudTextField Label="Postal Code" @bind-Value="WorkHistory.PostalCode" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.PostalCode)" />
+            <MudTextField Label="Country" @bind-Value="WorkHistory.Country" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.Country)" />
+            <MudTextField Label="Supervisor Name" @bind-Value="WorkHistory.SupervisorName" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.SupervisorName)" />
+            <MudTextField Label="Supervisor Phone" @bind-Value="WorkHistory.SupervisorPhone" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.SupervisorPhone)" />
+            <MudTextField Label="Supervisor Email" @bind-Value="WorkHistory.SupervisorEmail" Variant="MudBlazor.Variant.Outlined" />
+            <ValidationMessage For="@(() => WorkHistory.SupervisorEmail)" />
+            <MudCheckBox Label="Can Contact the Supervisor" @bind-Value="WorkHistory.CanContact" Color="Color.Primary" />
+            <ValidationMessage For="@(() => WorkHistory.CanContact)" />
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddWorkRecord">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    public WorkHistoryDTO WorkHistory { get; set; } = new WorkHistoryDTO();
+
+    [Parameter]
+    public int AppId { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public async Task AddWorkRecord()
+    {
+        WorkHistory.MainInfoId = AppId;
+        await _workHistory.AddWorkHistoryAsync(WorkHistory);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+}

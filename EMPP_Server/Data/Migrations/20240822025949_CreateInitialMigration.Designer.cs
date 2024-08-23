@@ -4,6 +4,7 @@ using EMPP_Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EMPP_Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240822025949_CreateInitialMigration")]
+    partial class CreateInitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,58 +142,6 @@ namespace EMPP_Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MainInfo");
-                });
-
-            modelBuilder.Entity("DataAccess.ApplicationData.Skill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("Guid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SkillLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SkillName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("WorkHistoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WorkHistoryId");
-
-                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("DataAccess.ApplicationData.WorkHistory", b =>
@@ -523,17 +474,6 @@ namespace EMPP_Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DataAccess.ApplicationData.Skill", b =>
-                {
-                    b.HasOne("DataAccess.ApplicationData.WorkHistory", "WorkHistory")
-                        .WithMany("Skills")
-                        .HasForeignKey("WorkHistoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WorkHistory");
-                });
-
             modelBuilder.Entity("DataAccess.ApplicationData.WorkHistory", b =>
                 {
                     b.HasOne("DataAccess.ApplicationData.MainInfo", "MainInfo")
@@ -599,11 +539,6 @@ namespace EMPP_Server.Migrations
             modelBuilder.Entity("DataAccess.ApplicationData.MainInfo", b =>
                 {
                     b.Navigation("WorkHistories");
-                });
-
-            modelBuilder.Entity("DataAccess.ApplicationData.WorkHistory", b =>
-                {
-                    b.Navigation("Skills");
                 });
 #pragma warning restore 612, 618
         }

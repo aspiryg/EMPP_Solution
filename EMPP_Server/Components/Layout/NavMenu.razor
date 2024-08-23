@@ -1,8 +1,25 @@
-﻿@implements IDisposable
-
+﻿
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
+
+<MudNavMenu Class="mud-width-full">
+    <MudText Typo="Typo.h6" Class="px-4">EMPP</MudText>
+    <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">DEVAC.CA</MudText>
+    <MudDivider Class="my-2" />
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="/applications" Icon="@Icons.Material.Filled.List">Application List</MudNavLink>
+    <MudNavLink Href="/myPortal" Icon="@Icons.Material.Filled.Dashboard">My Portal</MudNavLink>
+    <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+        <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People" IconColor="Color.Success">Users</MudNavLink>
+        <MudNavLink Href="/security" Icon="@Icons.Material.Filled.Security" IconColor="Color.Info">Security</MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>
+
+
+
+@* @implements IDisposable *@
+
+@* <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">EMPP_Server</a>
     </div>
@@ -89,4 +106,4 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
+ *@

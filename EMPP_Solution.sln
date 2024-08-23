@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35111.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMPP_Server", "EMPP_Server\EMPP_Server.csproj", "{FCD193A6-726F-437A-93FD-D8371C6DA3E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EMPP_Server", "EMPP_Server\EMPP_Server.csproj", "{FCD193A6-726F-437A-93FD-D8371C6DA3E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{D9CBA16B-3CE9-48E5-828C-FE5456845A9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{D9CBA16B-3CE9-48E5-828C-FE5456845A9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModels", "DataModels\DataModels.csproj", "{16C65744-E50F-4D63-AE9E-C0B03E6F00A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataModels", "DataModels\DataModels.csproj", "{16C65744-E50F-4D63-AE9E-C0B03E6F00A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

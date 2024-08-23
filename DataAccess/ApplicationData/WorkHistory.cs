@@ -46,5 +46,8 @@ namespace DataAccess.ApplicationData
         // Foreign Key
         public int MainInfoId { get; set; }
         public MainInfo MainInfo { get; set; }
+
+        // Navigation Property for Skill
+        public ICollection<Skill> Skills { get; set; } = new List<Skill>();
     }
 }

@@ -1,0 +1,76 @@
+﻿@page "/applications"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+
+@inject IJSRuntime JsRuntime
+@inject IMainInfoRepo MainInfoRepo
+
+
+<PageTitle>Application List</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Application List</h1>
+            <a href="/application/create" class="btn btn-primary">Create New Application</a>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Application Name</th>
+                        <th>Application Description</th>
+                        <th>Application Type</th>
+                        <th>Application Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mainInfo in Applications)
+                    {
+                        <tr>
+                            <td>@mainInfo.Id</td>
+                            <td>@($"{mainInfo.FirstName} {mainInfo.MiddleName} {mainInfo.LastName}")</td>
+                            <td></td>
+                            <td></td>
+                            <td>@mainInfo.IsDeleted</td>
+                            <td>
+                                <a href="/app.css" class="btn btn-primary">Edit</a>
+                                <button class="btn btn-danger" @onclick="() => DeleteMainInfo(mainInfo.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@code {
+
+    public IEnumerable<MainInfoDTO> Applications = new List<MainInfoDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadApplications();
+    }
+
+
+    public async Task LoadApplications()
+    {
+        Applications = await MainInfoRepo.GetAll();
+    }
+
+    private async Task DeleteMainInfo(int id)
+    {
+        var confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirm)
+        {
+            await MainInfoRepo.DeleteMainInfo(id);
+            await LoadApplications();
+        }
+    }
+}

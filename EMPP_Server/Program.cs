@@ -1,15 +1,21 @@
 using EMPP_Server.Components;
 using EMPP_Server.Components.Account;
 using EMPP_Server.Data;
+using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo;
+using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo;
+using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -35,10 +41,22 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+
+builder.Services.AddHttpClient();
+
 // Add Auto Mapper Service
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+// Add Radzen & MudBlazor
+builder.Services.AddRadzenComponents();
+builder.Services.AddMudServices();
 
+// Add Repositories
+builder.Services.AddScoped<IMainInfoRepo, MainInfoRepo>();
+builder.Services.AddScoped<IWorkHistoryRepo, WorkHistoryRepo>();
+
+// Add services.
+builder.Services.AddScoped<IGeneInfo, GeneInfoRepo>();
 
 var app = builder.Build();
 
