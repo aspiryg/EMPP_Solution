@@ -4,6 +4,7 @@ using EMPP_Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EMPP_Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240824180514_UpdateWorkHistory")]
+    partial class UpdateWorkHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,6 +315,9 @@ namespace EMPP_Server.Migrations
                     b.Property<int>("AppId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("CanContact")
                         .HasColumnType("bit");
 
@@ -404,7 +410,7 @@ namespace EMPP_Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppId");
+                    b.HasIndex("ApplicationId");
 
                     b.ToTable("WorkHistory");
                 });
@@ -651,7 +657,7 @@ namespace EMPP_Server.Migrations
                 {
                     b.HasOne("DataAccess.ApplicationData.InitialStage", "Application")
                         .WithMany("WorkHistories")
-                        .HasForeignKey("AppId")
+                        .HasForeignKey("ApplicationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

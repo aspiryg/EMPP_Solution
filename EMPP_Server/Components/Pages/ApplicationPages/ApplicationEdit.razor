@@ -1,16 +1,41 @@
-﻿@page "/application/create"
-@page "/application/edit/{id:int}"
+﻿@page "/application/create/{appId:int}"
+
 @using DataModels.ApplicationModels
+@using EMPP_Server.Data
 @using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
 @using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using Microsoft.AspNetCore.Identity
 
 
 @inject IMainInfoRepo _MainInfo
+@inject IInitialStage _initial
 @inject IGeneInfo _GeneInfo
 @inject NavigationManager _nav
 @inject ISnackbar _Snack
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
 
 <PageTitle>Application @(IsNew ? "Add" : "Edit")</PageTitle>
+
+
+<MudItem>
+    <MudTimeline Reverse="true" TimelinePosition="TimelinePosition.Bottom" TimelineOrientation="TimelineOrientation.Horizontal">
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Intake</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem DotStyle="background-color: #ff0000">
+            <MudText Align="Align.Center">Main Information</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Work History</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Education</MudText>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudItem>
+
 
 @if (IsLoading)
 {
@@ -23,7 +48,24 @@ else
         <ValidationSummary />
         <MudCard>
             <MudCardHeader>
-                <MudText Typo="Typo.h5">Main Information</MudText>
+                <MudGrid Justify="Justify.SpaceBetween">
+                    <MudItem>
+                        <MudGrid Justify="Justify.FlexStart">
+                            <MudItem>
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
+                            </MudItem>
+                            <MudItem>
+                                <MudText Typo="Typo.h5">Applicant Name: @($"{Application.FirstName} {Application.LastName}")</MudText>
+                                <MudText Typo="Typo.h6">Application Id: @Application.Id</MudText>
+                                <MudText Typo="Typo.h6">Main Info: @MainInfo.InitialStageId</MudText>
+                                <MudText Typo="Typo.h6">Main Info Id: @MainInfo.Id</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem>
+                        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="SaveApplication">Save</MudButton>
+                    </MudItem>
+                </MudGrid>
             </MudCardHeader>
             <MudCardContent>
                 <MudGrid>
@@ -63,7 +105,7 @@ else
                 <MudText Typo="Typo.h6">Contact Information</MudText>
                 <MudGrid>
                     <MudItem xs="12" sm="6">
-                        <MudTextField T="string" Label="Email" @bind-Value="MainInfo.Email" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                        <MudTextField Disabled T="string" Label="Email" @bind-Value="MainInfo.Email" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
                         <ValidationMessage For="@(() => MainInfo.Email)" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
@@ -162,7 +204,7 @@ else
                 </MudGrid>
             </MudCardContent>
             <MudCardActions>
-                <MudGrid Justify="Justify.FlexEnd" Class="justify-content-center">  
+                <MudGrid Justify="Justify.FlexEnd" Class="justify-content-center">
                     <MudItem>
                         <button type="submit" class="btn btn-primary">Next</button>
                     </MudItem>
@@ -176,36 +218,75 @@ else
 }
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
 
-    public bool IsNew => Id == 0;
+    [Parameter]
+    public int appId { get; set; }
+
+    public bool IsNew { get; set; } = true;
+
     public bool IsLoading { get; set; } = false;
 
     public MainInfoDTO MainInfo { get; set; } = new MainInfoDTO();
+    public InitialStageDTO Application { get; set; } = new InitialStageDTO();
+
+
+    // Get Current User
+    public ApplicationUser CurrentUser { get; set; } = new ApplicationUser();
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userObj = await _userManager.FindByEmailAsync(user.Identity.Name);
+            if (userObj != null)
+            {
+                CurrentUser = userObj;
+                MainInfo.UserId = CurrentUser.Id;
+                MainInfo.Email = CurrentUser.Email;
+            }
+        }
+    }
+
+
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
         await LoadApplication();
+        await GetCurrentUser();
         await GetCountryNamesAsync();
         IsLoading = false;
     }
 
     public async Task LoadApplication()
     {
-        if (IsNew)
+        if (appId != 0)
         {
-            MainInfo = new MainInfoDTO();
+            Application = await _initial.GetApplicationById(appId);
+            MainInfo = await _MainInfo.GetMainInfoByAppId(appId);
         }
-        else
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
         {
-            MainInfo = await _MainInfo.GetMainInfoById(Id);
+            MainInfo.FirstName = Application.FirstName;
+            MainInfo.LastName = Application.LastName;
+            if (MainInfo.InitialStageId != 0)
+            {
+                IsNew = false;
+            }
         }
     }
 
     public async Task SaveApplication()
     {
+        MainInfo.InitialStageId = Application.Id;
+        MainInfo.FirstName = Application.FirstName;
+        MainInfo.LastName = Application.LastName;
         if (IsNew)
         {
             await _MainInfo.AddMainInfo(MainInfo);
@@ -215,16 +296,15 @@ else
             await _MainInfo.UpdateMainInfo(MainInfo);
         }
 
-        var lastId = await _MainInfo.GetLastApplicationId();
         // Navigate to the work history page
-        _nav.NavigateTo($"/workhistory/edit/{lastId}");
+        _nav.NavigateTo($"/workhistory/edit/{appId}");
         // Success message
         _Snack.Add("Application saved successfully", Severity.Success);
     }
 
     public void Cancel()
     {
-        _nav.NavigateTo("/applications");        
+        _nav.NavigateTo("/applications");
     }
 
 

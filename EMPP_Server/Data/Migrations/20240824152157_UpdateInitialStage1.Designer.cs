@@ -4,6 +4,7 @@ using EMPP_Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EMPP_Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240824152157_UpdateInitialStage1")]
+    partial class UpdateInitialStage1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,9 +312,6 @@ namespace EMPP_Server.Migrations
                     b.Property<string>("AddressLine2")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("AppId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("CanContact")
                         .HasColumnType("bit");
 
@@ -362,6 +362,9 @@ namespace EMPP_Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("MainInfoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
@@ -404,7 +407,7 @@ namespace EMPP_Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppId");
+                    b.HasIndex("MainInfoId");
 
                     b.ToTable("WorkHistory");
                 });
@@ -649,13 +652,13 @@ namespace EMPP_Server.Migrations
 
             modelBuilder.Entity("DataAccess.ApplicationData.WorkHistory", b =>
                 {
-                    b.HasOne("DataAccess.ApplicationData.InitialStage", "Application")
+                    b.HasOne("DataAccess.ApplicationData.MainInfo", "MainInfo")
                         .WithMany("WorkHistories")
-                        .HasForeignKey("AppId")
+                        .HasForeignKey("MainInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Application");
+                    b.Navigation("MainInfo");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -709,7 +712,7 @@ namespace EMPP_Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataAccess.ApplicationData.InitialStage", b =>
+            modelBuilder.Entity("DataAccess.ApplicationData.MainInfo", b =>
                 {
                     b.Navigation("WorkHistories");
                 });

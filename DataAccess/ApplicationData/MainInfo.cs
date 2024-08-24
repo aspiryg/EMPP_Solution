@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,7 +57,8 @@ namespace DataAccess.ApplicationData
         // Foreign Key for the User
         public string UserId { get; set; } = string.Empty;
 
-        // Navigation Property for Work History
-        public ICollection<WorkHistory> WorkHistories { get; set; } = [];
+        // Navigation Property for Initial Stage
+        public int InitialStageId { get; set; }
+        public InitialStage InitialStage { get; set; }
     }
 }

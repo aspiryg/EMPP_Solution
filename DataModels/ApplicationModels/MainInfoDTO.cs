@@ -79,7 +79,10 @@ namespace DataModels.ApplicationModels
         // Foreign Key for the User
         public string UserId { get; set; } = string.Empty;
 
-        // Navigation Property for Work History
-        public ICollection<WorkHistoryDTO> WorkHistories { get; set; } = [];
+
+        // Navigation Property for Initial Stage
+        public int InitialStageId { get; set; }
+        public InitialStageDTO InitialStage { get; set; }
+
     }
 }

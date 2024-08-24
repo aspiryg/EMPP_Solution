@@ -16,5 +16,8 @@ namespace EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
 
         // Get Last Application Id
         Task<int> GetLastApplicationId();
+
+        // Get Main by application Id
+        Task<MainInfoDTO> GetMainInfoByAppId(int appId);
     }
 }

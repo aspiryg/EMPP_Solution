@@ -11,6 +11,7 @@ namespace EMPP_Server.Infrastructure.AutoMapper
             CreateMap<MainInfo, MainInfoDTO>().ReverseMap();
             CreateMap<WorkHistory, WorkHistoryDTO>().ReverseMap();
             CreateMap<Skill, SkillDTO>().ReverseMap();
+            CreateMap<InitialStage, InitialStageDTO>().ReverseMap();
         }
     }
 }

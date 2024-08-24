@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,10 +45,11 @@ namespace DataAccess.ApplicationData
         public bool IsActive { get; set; }
 
         // Foreign Key
-        public int MainInfoId { get; set; }
-        public MainInfo MainInfo { get; set; }
+        public int AppId { get; set; }
+        [ForeignKey("AppId")]
+        public InitialStage Application { get; set; }
 
         // Navigation Property for Skill
-        public ICollection<Skill> Skills { get; set; } = new List<Skill>();
+        public ICollection<Skill> Skills { get; set; } = [];
     }
 }

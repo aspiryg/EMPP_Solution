@@ -6,6 +6,7 @@
 <MudDialog>
     <TitleContent>
       <MudText Typo="Typo.h5">Add Work Experience</MudText>
+      <MudText Typo="Typo.body2">APP Id: @AppId</MudText>
     </TitleContent>
     <DialogContent>
         <EditForm Model="WorkHistory" OnValidSubmit="AddWorkRecord">
@@ -88,7 +89,7 @@
 
     public async Task AddWorkRecord()
     {
-        WorkHistory.MainInfoId = AppId;
+        WorkHistory.AppId = AppId;
         await _workHistory.AddWorkHistoryAsync(WorkHistory);
         MudDialog.Close(DialogResult.Ok(true));
     }

@@ -1,8 +1,10 @@
 using EMPP_Server.Components;
 using EMPP_Server.Components.Account;
 using EMPP_Server.Data;
+using EMPP_Server.Infrastructure.Repositories;
 using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo;
 using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo;
+using EMPP_Server.Infrastructure.Repositories.IRepo;
 using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -54,6 +56,7 @@ builder.Services.AddMudServices();
 // Add Repositories
 builder.Services.AddScoped<IMainInfoRepo, MainInfoRepo>();
 builder.Services.AddScoped<IWorkHistoryRepo, WorkHistoryRepo>();
+builder.Services.AddScoped<IInitialStage, InitialStageRepo>();
 
 // Add services.
 builder.Services.AddScoped<IGeneInfo, GeneInfoRepo>();

@@ -2,16 +2,35 @@
 @using DataModels.ApplicationModels
 @using EMPP_Server.Components.Pages.Comp
 @using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IRepo
 @using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
 
 @inject IWorkHistoryRepo _work
-@inject IMainInfoRepo _main
+@inject IInitialStage _main
 @inject IJSRuntime _js
 @inject NavigationManager _nav
 @inject ISnackbar _snackbar
 @inject IDialogService DialogService
 
 <PageTitle>Work History</PageTitle>
+
+<MudItem>
+    <MudTimeline Reverse="true" TimelinePosition="TimelinePosition.Bottom" TimelineOrientation="TimelineOrientation.Horizontal">
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Intake</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem >
+            <MudText Align="Align.Center">Main Information</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem DotStyle="background-color: #ff0000">
+            <MudText Align="Align.Center" >Work History</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Education</MudText>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudItem>
+
 
 @if (IsLoading)
 {
@@ -29,11 +48,11 @@ else
         <div class="row">
             <div class="col-md-12">
                 <MudPaper Elevation="4" Class="p-3">
-                    <MudGrid Justify="Justify.SpaceAround">
-                        <MudItem xs="12" sm="6">
+                    <MudGrid Justify="Justify.SpaceBetween">
+                        <MudItem>
                             <MudText Typo="Typo.h5">Application: @Application.FirstName @Application.LastName</MudText>
                         </MudItem>
-                        <MudItem xs="12" sm="6">
+                        <MudItem>
                             <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="AddWork">Add Work</MudButton>
                         </MudItem>
                     </MudGrid>
@@ -69,7 +88,6 @@ else
 
 
 
-
 @code {
     [Parameter] public int Id { get; set; }
 
@@ -81,7 +99,7 @@ else
 
     public IEnumerable<WorkHistoryDTO> WorkHistories = new List<WorkHistoryDTO>();
 
-    public MainInfoDTO Application { get; set; } = new MainInfoDTO();
+    public InitialStageDTO Application { get; set; } = new InitialStageDTO();
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,7 +111,7 @@ else
 
     private async Task LoadApplication()
     {
-        Application = await _main.GetMainInfoById(Id);
+        Application = await _main.GetApplicationById(Id);
     }
 
     private async Task LoadWorkHistory()
@@ -131,5 +149,13 @@ else
             _snackbar.Add("Work History Added", Severity.Success);
         }
 
+    }
+
+    private async Task Submit()
+    {
+        WorkHistory.AppId = Id;
+        await _work.AddWorkHistoryAsync(WorkHistory);
+        _snackbar.Add("Work History Added", Severity.Success);
+        await LoadWorkHistory();
     }
 }

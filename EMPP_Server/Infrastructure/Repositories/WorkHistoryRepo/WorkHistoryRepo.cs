@@ -38,7 +38,7 @@ namespace EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
 
         public async Task<IEnumerable<WorkHistoryDTO>> GetWorkHistoriesByAppIdAsync(int appId)
         {
-            var workHistories = await _context.WorkHistory.Where(x => x.MainInfoId == appId).ToListAsync();
+            var workHistories = await _context.WorkHistory.Where(x => x.AppId == appId).ToListAsync();
             if (workHistories == null)
             {
                 return [];

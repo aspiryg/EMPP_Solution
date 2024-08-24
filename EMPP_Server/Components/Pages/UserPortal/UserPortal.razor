@@ -71,23 +71,29 @@ else
 
     public string searchString1 { get; set; }
 
-    public List<WorkHistoryDTO> WorkHistories { get; set; } = new List<WorkHistoryDTO>();
+    public IEnumerable<WorkHistoryDTO> WorkHistories { get; set; } = new List<WorkHistoryDTO>();
 
     public bool IsLoading { get; set; } = false;
 
     public MainInfoDTO Application { get; set; } = new MainInfoDTO();
 
+
+
     protected override async Task OnInitializedAsync()
     {
-        Application = await _main.GetMainInfoByUserId(userId);
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
+        IsLoading = true;
+        await LoadApplication();
+        await LoadWorkHistory();
+        IsLoading = false;
     }
 
     public async Task LoadApplication()
     {
         Application = await _main.GetMainInfoByUserId(userId);
+    }
+
+    public async Task LoadWorkHistory()
+    {
+        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(Application.Id);
     }
 }

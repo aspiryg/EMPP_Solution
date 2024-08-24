@@ -1,0 +1,415 @@
+﻿@page "/intake"
+@page "/intake/{userId}&{applicationId:int}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Data
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using Microsoft.AspNetCore.Identity
+
+@inject IInitialStage _initial
+@inject NavigationManager _nav
+@inject ISnackbar _snackbar
+@inject UserManager<ApplicationUser> _user
+@inject AuthenticationStateProvider _auth
+
+
+
+<PageTitle>Intake</PageTitle>
+
+<MudItem>
+    <MudTimeline Reverse="true" TimelinePosition="TimelinePosition.Bottom" TimelineOrientation="TimelineOrientation.Horizontal">
+        <MudTimelineItem DotStyle="background-color: #ff0000">
+            <MudText Align="Align.Center">Intake</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Main Information</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Work History</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Education</MudText>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudItem>
+
+
+@if (IsLoading)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <MudAlert IsOpen="@IsLoading" Severity="Severity.Info">Loading...</MudAlert>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h1>@(IsNew ? "Start" : "Edit") Application</h1>
+    <EditForm Model="Application" OnValidSubmit="SaveApplication">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
+            <RadzenColumn Size="12" SizeMD="12">
+                <RadzenStack>
+                    <RadzenFieldset Text="Contact Information">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenLabel Text="Email Address *" Component="EmailAddress" />
+                                    <RadzenTextBox Disabled @bind-Value="Application.Email" Placeholder="Email Address" Style="width: 100%;" Name="EmailAddress"></RadzenTextBox>
+                                    <ValidationMessage For="@(() => Application.Email)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenLabel Text="First Name *" Component="FirstName" />
+                                    <RadzenTextBox @bind-Value="Application.FirstName" Placeholder="First Name" Style="width: 100%;" Name="FirstName"></RadzenTextBox>
+                                    <ValidationMessage For="@(() => Application.FirstName)" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenLabel Text="Last Name *" Component="LastName" />
+                                    <RadzenTextBox @bind-Value="Application.LastName" Placeholder="Last Name" Style="width: 100%;" Name="LastName"></RadzenTextBox>
+                                    <ValidationMessage For="@(() => Application.LastName)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Introduction">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        <strong>DEVAC.CA Inc.</strong><br />
+                                        DEVAC is etc., providing etc., we are not responsible etc. Our services at the moment is to provide a web platform to help refugees
+                                        More services will be charged
+                                        We are not a legal entity
+                                        Our information is from open sources and official Canadian web sites such as IRCC and National Occupational Classification - https://noc.esdc.gc.ca/
+                                        Consent
+                                        Third party data sharing
+                                    </RadzenText>
+                                    @*Confirm Understanding terms and Conditions with label I confirm that I have read and understood the terms and conditions*@
+                                    <RadzenAlert ShowIcon="false" Variant="Radzen.Variant.Flat" AlertStyle="AlertStyle.Info" Size="AlertSize.Large" Shade="Shade.Lighter" AllowClose=false>
+                                        <RadzenLabel Text="I confirm that I have read and understood the terms and conditions" Component="TermsAndConditions" />
+                                        <RadzenCheckBox TValue="bool" Value="Application.TermsAndConditions" Change=@(args => Application.TermsAndConditions = args) Name="TermsAndConditions" />
+                                    </RadzenAlert>
+                                    <ValidationMessage For="@(() => Application.TermsAndConditions)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Privacy Policy">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        @*Write a paragraph on privacy policy*@
+                                        <strong>Privacy Policy</strong><br />
+                                        DEVAC.CA Inc. is committed to protecting your privacy. We will only use the information that we collect about you lawfully (in accordance with the Data Protection Act 1998 and GDPR). We collect information about you for 2 reasons: firstly, to process your order and second, to provide you with the best possible service. We will not e-mail you in the future unless you have given us your consent. We will give you the chance to refuse any marketing email from us or from another trader in the future. The type of information we will collect about you includes: your name, address, phone number, and email address. We will never collect sensitive information about you without your explicit consent. The information we hold will be accurate and up to date. You can check the information that we hold about you by emailing us. If you find any inaccuracies, we will delete or correct it promptly. The personal information which we hold will be held securely in accordance with our internal security policy and the law. If we intend to transfer your information outside the EEA (European Economic Area) we will always obtain your consent first. We may use technology to track the patterns of behavior of visitors to our site. This can include using a "cookie" which would be stored on your browser. You can usually modify your browser to prevent this happening. The information collected in this way can be used to identify you unless you modify your browser settings. If you have any questions/comments about privacy, you should email us at <a class="link-danger" href="mailto:project@divac.ca">project@divac.ca</a> or call us at <a class="link-info" href="tel:647-123-4567">647-123-4567</a>. We will not share your information with any third party without your explicit consent.
+                                    </RadzenText>
+                                    @*Confirm Understanding Privacy Policy and consent*@
+                                    <RadzenAlert ShowIcon="false" Variant="Radzen.Variant.Flat" AlertStyle="AlertStyle.Info" Size="AlertSize.Large" Shade="Shade.Lighter" AllowClose=false>
+                                        <RadzenLabel Text="I confirm that I have read and understood the privacy policy" Component="PrivacyPolicy" />
+                                        <RadzenCheckBox TValue="bool" Value="Application.PrivacyPolicy" Change=@(args => Application.PrivacyPolicy = args) Name="PrivacyPolicy" />
+                                    </RadzenAlert>
+                                    <ValidationMessage For="@(() => Application.PrivacyPolicy)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Confirming the information provided is true and accurate">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        <strong>Confirmation</strong><br />
+                                        I confirm that the information provided is true and accurate to the best of my knowledge. I understand that providing false information may result in the rejection of my application.
+                                    </RadzenText>
+                                    @*Confirming the information provided is true and accurate*@
+                                    <RadzenAlert ShowIcon="false" Variant="Radzen.Variant.Flat" AlertStyle="AlertStyle.Info" Size="AlertSize.Large" Shade="Shade.Lighter" AllowClose=false>
+                                        <RadzenLabel Text="I confirm that the information provided is true and accurate" Component="ConfirmInformation" />
+                                        <RadzenCheckBox TValue="bool" Value="Application.ConfirmInformation" Change=@(args => Application.ConfirmInformation = args) Name="ConfirmInformation" />
+                                    </RadzenAlert>
+                                    <ValidationMessage For="@(() => Application.ConfirmInformation)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Volunteering">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        DEVAC.CA Inc. Team is providing these services for free in condition of volunteering with us. Do you agree to volunteer?
+                                    </RadzenText>
+                                    <RadzenLabel Text="Consent to Volunteer" Component="VolunteeringAvailability" />
+                                    <RadzenDropDown @bind-Value="Application.VolunteeringAvailability" Data="@VolunteeringAvailabilities" Style="width: 100%;" Name="VolunteeringAvailability"></RadzenDropDown>
+                                    <ValidationMessage For="@(() => Application.VolunteeringAvailability)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                            @if (Application.VolunteeringAvailability != "No")
+                            {
+                                <RadzenFieldset Text="Volunteering Availability">
+                                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                        <RadzenColumn Size="12" SizeMD="12">
+                                            <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                                Please select the days and times you are available to volunteer.
+                                            </RadzenText>
+                                            @*Volunteering Availability*@
+                                            <RadzenCheckBoxList TValue="string" AllowSelectAll="true" SelectAllText="Select all items" Data="@VolunteeringAvailability" Style="width: 100%;" Name="Availability">
+                                            </RadzenCheckBoxList>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </RadzenFieldset>
+                            }
+                            <RadzenFieldset Text="Volunteering Areas">
+                                <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                            Please select the areas you are interested in volunteering. Please select no more than 3 areas.
+                                        </RadzenText>
+                                        @*Volunteering Areas*@
+                                        <RadzenCheckBoxList TValue="string" Data="@VolunteeringAreas" Style="width: 100%;" Name="Areas">
+                                        </RadzenCheckBoxList>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenFieldset>
+                            <RadzenFieldset Text="Volunteering Skills">
+                                <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                            Please describe what skills you have that you would like to use while volunteering with us.
+                                        </RadzenText>
+                                        <RadzenTextArea @bind-Value="Application.VolunteeringSkills" Placeholder="Skills" Style="width: 100%;" Name="Skills"></RadzenTextArea>
+                                        <ValidationMessage For="@(() => Application.VolunteeringSkills)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenFieldset>
+                            <RadzenFieldset Text="Weekly Volunteering Hours">
+                                <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                            Please indicate the number of hours you are willing to volunteer per week.
+                                        </RadzenText>
+                                        <RadzenNumeric @bind-Value="Application.WeeklyVolunteeringHours" Placeholder="Hours" Style="width: 100%;" Name="Hours"></RadzenNumeric>
+                                        <ValidationMessage For="@(() => Application.WeeklyVolunteeringHours)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenFieldset>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Age Confirmation">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        I confirm that I am 18 years of age or older.
+                                    </RadzenText>
+                                    @*Age Confirmation*@
+                                    <RadzenAlert ShowIcon="false" Variant="Radzen.Variant.Flat" AlertStyle="AlertStyle.Info" Size="AlertSize.Large" Shade="Shade.Lighter" AllowClose=false>
+                                        <RadzenLabel Text="I confirm that I am 18 years of age or older" Component="AgeConfirmation" />
+                                        <RadzenCheckBox TValue="bool" Value="Application.AgeConfirmation" Change=@(args => Application.AgeConfirmation = args) Name="AgeConfirmation" />
+                                    </RadzenAlert>
+                                    <ValidationMessage For="@(() => Application.AgeConfirmation)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Refugee or displaced person">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        I confirm that I am a refugee or a displaced person.
+                                    </RadzenText>
+                                    @*Refugee Or displaced person*@
+                                    <RadzenAlert ShowIcon="false" Variant="Radzen.Variant.Flat" AlertStyle="AlertStyle.Info" Size="AlertSize.Large" Shade="Shade.Lighter" AllowClose=false>
+                                        <RadzenLabel Text="I confirm that I am a refugee or a displaced person" Component="RefugeeOrDisplacedPerson" />
+                                        <RadzenCheckBox TValue="bool" Value="Application.IsRefugee" Change=@(args => Application.IsRefugee = args) Name="RefugeeOrDisplacedPerson" />
+                                    </RadzenAlert>
+                                    <ValidationMessage For="@(() => Application.IsRefugee)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Are you currently living in Canada?">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        @*Empty*@
+                                    </RadzenText>
+                                    @*Living In Canada*@
+                                    <RadzenRadioButtonList @bind-Value=@Application.IsLivingInCanada TValue="bool">
+                                        <Items>
+                                            <RadzenRadioButtonListItem Text="Yes" Value="true" />
+                                            <RadzenRadioButtonListItem Text="No" Value="false" />
+                                        </Items>
+                                    </RadzenRadioButtonList>
+                                    <ValidationMessage For="@(() => Application.IsLivingInCanada)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Do you Intend to reside in Quebec province?">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="12">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        @*Empty*@
+                                    </RadzenText>
+                                    @*Reside In Quebec*@
+                                    <RadzenRadioButtonList @bind-Value=@Application.WantToResideInQuebec TValue="bool">
+                                        <Items>
+                                            <RadzenRadioButtonListItem Text="Yes" Value="true" />
+                                            <RadzenRadioButtonListItem Text="No" Value="false" />
+                                        </Items>
+                                    </RadzenRadioButtonList>
+                                    <ValidationMessage For="@(() => Application.WantToResideInQuebec)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                    <RadzenFieldset Text="Previous Application">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenText TextStyle="TextStyle.Body1" TextAlign="TextAlign.Left">
+                                        Have you ever submitted your application for the EMPP Program before?
+                                    </RadzenText>
+                                    @*Previous Application*@
+                                    <RadzenRadioButtonList @bind-Value=@Application.HasPreviousApplication TValue="bool">
+                                        <Items>
+                                            <RadzenRadioButtonListItem Text="Yes" Value="true" />
+                                            <RadzenRadioButtonListItem Text="No" Value="false" />
+                                        </Items>
+                                    </RadzenRadioButtonList>
+                                    <ValidationMessage For="@(() => Application.HasPreviousApplication)" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenLabel Text="If yes, please provide details of your previous application" Component="PreviousApplicationDetails" />
+                                    @*Previous Application Detail*@
+                                    <RadzenTextArea @bind-Value="Application.PreviousApplicationDetails" Style="width: 100%;" Name="PreviousApplicationDetails"></RadzenTextArea>
+                                    <ValidationMessage For="@(() => Application.PreviousApplicationDetails)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenFieldset>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4" AlignItems="Radzen.AlignItems.End" JustifyContent="JustifyContent.End">
+
+            <button type="submit" class="btn btn-primary">Save and Exit</button>
+            <button type="submit" class="btn btn-success">Next</button>
+            <button type="button" class="btn btn-danger" @onclick="Cancel">Cancel</button>
+
+            @*             <RadzenButton ButtonType="Radzen.ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Variant="Radzen.Variant.Flat" Text="Save and Exit" Click="()=>SaveApplication(1)" Style="margin-right: 1rem;" />
+        <RadzenButton ButtonType="Radzen.ButtonType.Submit" ButtonStyle="ButtonStyle.Success" Text="Next" Click="()=>SaveApplication(2)" Style="margin-right: 1rem;" />
+        <RadzenButton ButtonType="Radzen.ButtonType.Button" ButtonStyle="ButtonStyle.Warning" Click="Cancel" Text="Cancel" /> *@
+        </RadzenRow>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+    [Parameter]
+    public int applicationId { get; set; }
+
+    public string searchString1 { get; set; }
+    public bool IsLoading { get; set; } = false;
+
+    public bool IsNew { get; set; } = true;
+
+    public InitialStageDTO Application { get; set; } = new InitialStageDTO();
+
+
+    // Get the user
+    public ApplicationUser User { get; set; } = new ApplicationUser();
+
+    public string UserEmailAddress { get; set; }
+
+    private async Task GetUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            UserEmailAddress = user.Identity.Name;
+            if (UserEmailAddress != null)
+            {
+                var userObj = await _user.FindByEmailAsync(UserEmailAddress);
+                if (userObj != null)
+                {
+                    User = userObj;
+                }
+            }
+        }
+    }
+
+    private async Task LoadApplication()
+    {
+        Application = await _initial.GetApplicationByUserId(userId, applicationId);
+        IsNew = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        await GetUser();
+        if (userId != null)
+        {
+            await LoadApplication();
+        }
+        IsLoading = false;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
+            Application.UserId = User.Id;
+            Application.Email = User.Email;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveApplication()
+    {
+        if (IsNew)
+        {
+            await _initial.CreateApplication(Application);
+            _snackbar.Add("Application Created", Severity.Success);
+        }
+        else
+        {
+            await _initial.UpdateApplication(Application);
+            _snackbar.Add("Application Updated", Severity.Success);
+        }
+
+        var lastApplication = await _initial.GetLastApplication();
+        var applicationId = lastApplication.Id;
+
+        _nav.NavigateTo($"/application/create/{applicationId}");
+    }
+
+
+    private void Cancel()
+    {
+        _nav.NavigateTo("/Home");
+    }
+
+
+    // List of Volunteering Availability with default values
+    public List<string> VolunteeringAvailabilities = new List<string> { "Yes", "No", "I would like to volunteer but I will not apply to the program" };
+
+
+    // List of Volunteering Availability with default values
+    public List<string> VolunteeringAvailability = new List<string> { "Weekdays", "Weekends", "Evenings", "Mornings" };
+
+    // List of Volunteering Areas with default values
+    public List<string> VolunteeringAreas = new List<string> { "Administration", "Marketing", "Web Development", "Graphic Design", "Content Writing", "Research", "Data Entry", "Customer Service", "Other" };
+}

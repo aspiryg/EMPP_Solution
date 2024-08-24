@@ -11,6 +11,7 @@ namespace EMPP_Server.Data
         public DbSet<MainInfo> MainInfo { get; set; }
         public DbSet<WorkHistory> WorkHistory { get; set; }
         public DbSet<Skill> Skills { get; set; }
+        public DbSet<InitialStage> InitialStages { get; set; }
 
         //internal Action<IMappingOperationOptions<object, void>> FindAsync(WorkHistoryDTO workHistory)
         //{

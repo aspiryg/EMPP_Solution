@@ -42,7 +42,10 @@ namespace DataModels.ApplicationModels
         public bool IsActive { get; set; }
 
         // Foreign Key
-        public int MainInfoId { get; set; }
-        public MainInfoDTO MainInfo { get; set; }
+        public int AppId { get; set; }
+        public InitialStageDTO Application { get; set; }
+
+        // Navigation Property for Skill
+        public ICollection<SkillDTO> Skills { get; set; } = [];
     }
 }
