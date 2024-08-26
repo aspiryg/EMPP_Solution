@@ -1,0 +1,105 @@
+﻿@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject ISkillRepo _skill
+@inject IJSRuntime _js
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h5">@(IsNew?"Add":"Edit") Skill</MudText>
+        <MudText Typo="Typo.body2">Work Id: @WorkId</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="Skill" OnValidSubmit="AddSkillRecord">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Skill" @bind-Value="Skill.SkillName" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                    <ValidationMessage For="@(() => Skill.SkillName)" />
+                    <MudSelect Label="Skill Level" @bind-Value="Skill.SkillLevel" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                        @foreach (var skillLevel in SkillLevels)
+                        {
+                            <MudSelectItem Value=@skillLevel Label=@skillLevel />
+                        }
+                    </MudSelect>
+                    <ValidationMessage For="@(() => Skill.SkillLevel)" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" OnClick="AddSkillRecord">Submit</MudButton>
+                    @if (!IsNew)
+                    {
+                        <MudButton Color="Color.Secondary" OnClick="() => DeleteSkill(SkillId)">Delete</MudButton>
+                    }
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    public SkillDTO Skill { get; set; } = new SkillDTO();
+
+    [Parameter]
+    public int WorkId { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public int SkillId { get; set; }
+
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsNew)
+        {
+            Skill = await _skill.GetById(SkillId);
+        }
+    }
+
+    public async Task AddSkillRecord()
+    {
+        Skill.WorkHistoryId = WorkId;
+        if (IsNew)
+        {
+            await _skill.Create(Skill);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            await _skill.Update(Skill);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    // Delete Skill with confirmation
+    public async Task DeleteSkill(int id)
+    {
+        bool confirmed = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await _skill.Delete(id);
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+
+
+    // Initiate a Skill Level List of strings
+    private List<string> SkillLevels = new List<string> { "Beginner", "Intermediate", "Advanced", "Expert" };
+}

@@ -12,17 +12,14 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, User!</h1>
-
-Welcome to your Immigration Portal.
 
 <AuthorizeView>
     <Authorized>
-        <p>Hello, @context.User.Identity?.Name!</p>
+        <h1>Hello, @context.User.Identity?.Name!</h1>
         <p>Here are your current applications:</p>
         @if (Applications.Any())
         {
-            <table class="table">
+            <table class="table table-active">
                 <thead>
                     <tr>
                         <th>Application Number</th>
@@ -35,6 +32,7 @@ Welcome to your Immigration Portal.
                 <tbody>
                     @foreach (var application in Applications)
                     {
+
                         <tr>
                             <td>@application.ApplicationNumber</td>
                             <td></td>
@@ -54,7 +52,7 @@ Welcome to your Immigration Portal.
             <p>You have no applications.</p>
         }
 
-        <p>Click the button below to start your application.</p>
+        <p>Click the button below to start a new application.</p>
         <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="StartApplication">Start Application</MudButton>
         <p>Or click the button below to register.</p>
         <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" OnClick="RegisterNow">Register</MudButton>
@@ -130,7 +128,7 @@ Welcome to your Immigration Portal.
         }
     }
 
-    private void ResumeApplication(string userId,int id)
+    private void ResumeApplication(string userId, int id)
     {
         _nav.NavigateTo($"/Intake/{userId}&{id}");
     }

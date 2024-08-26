@@ -46,5 +46,9 @@ namespace DataAccess.ApplicationData
 
         // Navigation Property for Work History
         public ICollection<WorkHistory> WorkHistories { get; set; } = [];
+
+        // one to one relationship with LanguageData
+        public LanguageData LanguageData { get; set; }
+
     }
 }

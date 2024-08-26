@@ -11,6 +11,12 @@ namespace EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
         {
             _httpClient = httpClient;
         }
+
+        public Task<List<string>> GetALLCities()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<List<string>> GetALLCountries()
         {
             // use this API: https://restcountries.com/v3.1/all
@@ -39,6 +45,45 @@ namespace EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
                 Console.WriteLine(ex.Message);
                 return [];
             }
+        }
+
+
+        public async Task<List<string>> GetALLLanguages()
+        {
+            // use this API: https://restcountries.com/v3.1/all
+            HttpResponseMessage response = await _httpClient.GetAsync("https://restcountries.com/v3.1/all");
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            var countries = JsonConvert.DeserializeObject<List<CountryDTO>>(responseBody);
+
+            List<string> languageList = new List<string>();
+            // Extract language names
+            foreach (var country in countries)
+            {
+                if (country.Languages != null)
+                {
+                    foreach (var language in country.Languages)
+                    {
+                        languageList.Add(language.Value);
+                    }
+                }
+            }
+
+            // Catch and try to handle exceptions
+            try
+            {
+                return languageList;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return [];
+            }
+        }
+
+        public Task<List<string>> GetALLStates()
+        {
+            throw new NotImplementedException();
         }
     }
 }

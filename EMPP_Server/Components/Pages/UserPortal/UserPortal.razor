@@ -1,68 +1,95 @@
 ﻿@page "/myPortal"
 @page "/userPortal/{userId}"
 @using DataModels.ApplicationModels
+@using EMPP_Server.Data
 @using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IRepo
 @using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+@using Microsoft.AspNetCore.Identity
 
+@inject IInitialStage _initial
 @inject IMainInfoRepo _main
-@inject NavigationManager _nav
 @inject IWorkHistoryRepo _work
+@inject ILanguageData _languageData
+@inject ILanguageTestRepo _languageTest
+@inject NavigationManager _nav
 @inject ISnackbar _snackbar
+@inject IJSRuntime _js
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
 
 
 <PageTitle>User Portal</PageTitle>
 
 @if (IsLoading)
 {
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <MudAlert IsOpen="@IsLoading" Severity="Severity.Info">Loading...</MudAlert>
-            </div>
-        </div>
-    </div>
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" class="rz-m-12" Gap="2rem">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+            <Template>Wait</Template>
+        </RadzenProgressBarCircular>
+    </RadzenStack>
 }
 else
 {
-    <main class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <MudPaper Elevation="4" Class="p-3">
-                    <MudGrid Justify="Justify.SpaceAround">
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.h5">Application: @Application.FirstName @Application.LastName</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Add Work</MudButton>
-                        </MudItem>
-                    </MudGrid>
-                    <MudTable Items="@WorkHistories" Dense="true" Hover="true" Bordered="true" Striped="true">
-                        <ToolBarContent>
-                            <MudText Typo="Typo.h6">Work History</MudText>
-                            <MudSpacer />
-                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                        </ToolBarContent>
-                        <HeaderContent>
-                            <MudTh>Company Name</MudTh>
-                            <MudTh>Position</MudTh>
-                            <MudTh>Start Date</MudTh>
-                            <MudTh>End Date</MudTh>
-                            <MudTh>Actions</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@context.CompanyName</MudTd>
-                            <MudTd>@context.Position</MudTd>
-                            <MudTd>@context.StartDate</MudTd>
-                            <MudTd>@context.EndDate</MudTd>
-                            <MudTd>
-                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Delete</MudButton>
-                            </MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                </MudPaper>
-            </div>
-        </div>
-    </main>
+    <MudPaper Elevation="4" Class="p-3">
+        <MudGrid Justify="Justify.SpaceBetween">
+            <MudItem>
+                <MudText Typo="Typo.h5">User Portal</MudText>
+            </MudItem>
+            <MudItem>
+                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Error" OnClick='() => _nav.NavigateTo("/")'>Cancel</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="4" Class="p-3">
+                <MudText Typo="Typo.h6">Main Information</MudText>
+                <MudDivider />
+                <MudText Typo="Typo.body1">Name: @($"{Main.FirstName} {Main.MiddleName} {Main.LastName}")</MudText>
+                <MudText Typo="Typo.body1">Email: @Main.Email</MudText>
+                <MudText Typo="Typo.body1">Phone: @Main.Phone</MudText>
+                <MudText Typo="Typo.body1">Address: @Main.AddressLine1</MudText>
+                <MudText Typo="Typo.body1">City: @Main.City</MudText>
+                <MudText Typo="Typo.body1">State: @Main.State</MudText>
+                <MudText Typo="Typo.body1">Zip: @Main.PostalCode</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="4" Class="p-3">
+                <MudText Typo="Typo.h6">Work History</MudText>
+                <MudDivider />
+                @foreach (var work in WorkHistories)
+                {
+                    <MudText Typo="Typo.body1">Company: @work.CompanyName</MudText>
+                    <MudText Typo="Typo.body1">Position: @work.Position</MudText>
+                    <MudText Typo="Typo.body1">Start Date: @work.StartDate</MudText>
+                    <MudText Typo="Typo.body1">End Date: @work.EndDate</MudText>
+                    <MudText Typo="Typo.body1">Description: @work.Skills</MudText>
+                    <MudDivider />
+                }
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="4" Class="p-3">
+                <MudText Typo="Typo.h6">Language Data</MudText>
+                <MudDivider />
+                <MudText Typo="Typo.body1">Language: @LanguageData.ApplicantLanguage</MudText>
+                <MudText Typo="Typo.body1">Proficiency: @LanguageData.SecondLanguage</MudText>
+                <MudDivider />
+                @foreach (var test in LanguageTests)
+                {
+                    <MudText Typo="Typo.body1">Test Date: @test.TestDate</MudText>
+                    <MudText Typo="Typo.body1">Test Score: @test.TestScore</MudText>
+                    <MudText Typo="Typo.body1">Test Type: @test.TestType</MudText>
+                    <MudDivider />
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
 }
 
 @code {
@@ -71,29 +98,74 @@ else
 
     public string searchString1 { get; set; }
 
+    public InitialStageDTO InitialStage { get; set; } = new InitialStageDTO();
+
+    public MainInfoDTO Main { get; set; } = new MainInfoDTO();
+
     public IEnumerable<WorkHistoryDTO> WorkHistories { get; set; } = new List<WorkHistoryDTO>();
+    public IEnumerable<SkillDTO> Skills { get; set; } = new List<SkillDTO>();
+
+    public LanguageDataDTO LanguageData { get; set; } = new LanguageDataDTO();
+    public IEnumerable<LanguageTestDTO> LanguageTests { get; set; } = new List<LanguageTestDTO>();
+
+
 
     public bool IsLoading { get; set; } = false;
 
-    public MainInfoDTO Application { get; set; } = new MainInfoDTO();
 
 
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
+        await GetCurrentUser();
         await LoadApplication();
         await LoadWorkHistory();
+        await LoadLanguageData();
         IsLoading = false;
     }
 
     public async Task LoadApplication()
     {
-        Application = await _main.GetMainInfoByUserId(userId);
+        var applications = await _initial.GetAllApplicationsByUserId(CurrentUser.Id);
+        if (applications.Any())
+        {
+            var app = applications.FirstOrDefault();
+
+            if (app != null)
+            {
+                InitialStage = app;
+            }
+        }
+        Main = await _main.GetMainInfoByAppId(InitialStage.Id);
     }
 
     public async Task LoadWorkHistory()
     {
-        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(Application.Id);
+        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(InitialStage.Id);
     }
+
+    public async Task LoadLanguageData()
+    {
+        LanguageData = await _languageData.GetLanguageByAppIdAsync(InitialStage.Id);
+        LanguageTests = await _languageTest.GetLanguageTestsByAppIdAsync(InitialStage.Id);
+    }
+
+    // Get the current user
+    public ApplicationUser CurrentUser { get; set; } = new ApplicationUser();
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userObj = await _userManager.FindByEmailAsync(user.Identity.Name);
+            if (userObj != null)
+            {
+                CurrentUser = userObj;
+            }
+        }
+    }
+
 }

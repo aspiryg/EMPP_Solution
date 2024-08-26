@@ -1,0 +1,213 @@
+﻿@page "/language-data/{appId:int}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Data
+@using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using Microsoft.AspNetCore.Identity
+
+@inject ILanguageData _languageData
+@inject ILanguageTestRepo _languageTest
+@inject ISnackbar _snackBar
+@inject NavigationManager _nav
+@inject IJSRuntime _js
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
+@inject IGeneInfo _geneInfo
+
+<PageTitle>Language Data</PageTitle>
+
+<MudItem>
+    <MudTimeline Reverse="true" TimelinePosition="TimelinePosition.Bottom" TimelineOrientation="TimelineOrientation.Horizontal">
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Intake</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Main Information</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Work History</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem DotStyle="background-color: #ff0000">
+            <MudText Align="Align.Center">Language Data</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
+            <MudText Align="Align.Center">Education</MudText>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudItem>
+
+@if (isLoading)
+{
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" class="rz-m-12" Gap="2rem">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+            <Template>Wait</Template>
+        </RadzenProgressBarCircular>
+    </RadzenStack>
+}
+else
+{
+    @*Header or title*@
+    <MudPaper Elevation="4" Class="p-3">
+        <MudGrid Justify="Justify.SpaceBetween">
+            <MudItem>
+                <MudText Typo="Typo.h5">@(isEditing ? "Edit" : "Add") Language Data</MudText>
+            </MudItem>
+            <MudItem>
+                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Error" OnClick='() => _nav.NavigateTo("/")'>Cancel</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+    @*Form*@
+    <MudPaper Elevation="4" Class="p-3">
+        <MudText Typo="Typo.h6">Language Data</MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudSelect Margin="Margin.Dense" Label="Applicant Mother Language" @bind-Value="languageData.ApplicantLanguage" Variant="MudBlazor.Variant.Outlined">
+                    @foreach (var language in languageList)
+                    {
+                        <MudSelectItem Value="@language">@language</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudText> Do you speak one of these languages beside your mother lounge</MudText>
+                <RadzenCheckBoxList TValue="string" @bind-Value="languageData.SecondLanguages" AllowSelectAll="false" Data="@_secondLanguage" Style="width: 100%;" Name="SecondLanguage">
+
+                </RadzenCheckBoxList>
+                @*                     <MudText>Values: @string.Join(", ", languageData.SecondLanguages ?? new List<string>())</MudText> *@
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudInputLabel>Which of the following approved English language tests you have done over the last two years?</MudInputLabel>
+                <MudSelect Margin="Margin.Dense" Label="English Test" @bind-Value="languageData.EngApprovedTest" Variant="MudBlazor.Variant.Outlined">
+                    @foreach (var test in EnglishTests)
+                    {
+                        <MudSelectItem Value="@test">@test</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                @*a Matrix to take rating inputs on 4 different Variables: CELPIPReading , CELPIPWriting , CELPIPSpeaking , CELPIPListening *@
+                <MudText>Rate your English language proficiency on the following variables</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="CELPIP Reading" @bind-Value="languageData.CELPIPReading" Variant="MudBlazor.Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="CELPIP Writing" @bind-Value="languageData.CELPIPWriting" Variant="MudBlazor.Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="CELPIP Speaking" @bind-Value="languageData.CELPIPSpeaking" Variant="MudBlazor.Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="CELPIP Listening" @bind-Value="languageData.CELPIPListening" Variant="MudBlazor.Variant.Outlined" />
+                    </MudItem>
+                    </MudGrid>
+
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @*Table for the languages*@
+}
+
+
+
+@code {
+    [Parameter] public int AppId { get; set; }
+
+    // Variables
+    public bool isLoading { get; set; } = true;
+    public bool isEditing { get; set; } = false;
+
+    private IEnumerable<string> _secondLanguage = new[] { "English", "French", "Other" };
+    public string OtherLanguage { get; set; } = string.Empty;
+
+    // Data Models
+
+    public LanguageDataDTO languageData { get; set; } = new LanguageDataDTO();
+
+    public IEnumerable<LanguageTestDTO> languageTests { get; set; } = new List<LanguageTestDTO>();
+
+
+
+    // Methods
+
+    private async Task CheckMode()
+    {
+        var mode = await _languageData.LanguageExistsAsync(AppId);
+        if (mode)
+        {
+            isEditing = true;
+        }
+    }
+
+    private async Task LoadLanguagesData()
+    {
+        languageData = await _languageData.GetLanguageByAppIdAsync(AppId);
+        languageTests = await _languageTest.GetLanguageTestsByAppIdAsync(AppId);
+        isLoading = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckMode();
+        await GetCurrentUser();
+        if (isEditing)
+        {
+            await LoadLanguagesData();
+        }
+        await GetLanguagesAsync();
+        isLoading = false;
+    }
+
+    // Get Current User
+    public ApplicationUser CurrentUser { get; set; } = new ApplicationUser();
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userObj = await _userManager.FindByEmailAsync(user.Identity.Name);
+            if (userObj != null)
+            {
+                CurrentUser = userObj;
+            }
+        }
+    }
+
+    // Save Language Data
+    private async Task SaveLanguageData()
+    {
+        if (isEditing)
+        {
+            await _languageData.UpdateLanguageAsync(languageData);
+            _snackBar.Add("Language Data Updated Successfully", Severity.Success);
+        }
+        else
+        {
+            languageData.InitialStageId = AppId;
+            languageData.CreatedBy = CurrentUser.Id;
+            await _languageData.AddLanguageAsync(languageData);
+            _snackBar.Add("Language Data Added Successfully", Severity.Success);
+        }
+        await LoadLanguagesData();
+    }
+
+    // Get all the languages from GeneInfo
+    public new List<string> languageList { get; set; } = new List<string>();
+
+    public async Task GetLanguagesAsync()
+    {
+        languageList = await _geneInfo.GetALLLanguages();
+    }
+
+    // a new list of English language approved tests. Initiated with Data
+    public List<string> EnglishTests { get; set; } = new List<string> { "CELPIP-General", "IELTS General Training", "PTE Core", "None of the above" };
+
+
+    // Dispose
+
+}

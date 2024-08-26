@@ -6,6 +6,7 @@
 @using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
 
 @inject IWorkHistoryRepo _work
+@inject ISkillRepo _skill
 @inject IInitialStage _main
 @inject IJSRuntime _js
 @inject NavigationManager _nav
@@ -19,11 +20,11 @@
         <MudTimelineItem>
             <MudText Align="Align.Center">Intake</MudText>
         </MudTimelineItem>
-        <MudTimelineItem >
+        <MudTimelineItem>
             <MudText Align="Align.Center">Main Information</MudText>
         </MudTimelineItem>
         <MudTimelineItem DotStyle="background-color: #ff0000">
-            <MudText Align="Align.Center" >Work History</MudText>
+            <MudText Align="Align.Center">Work History</MudText>
         </MudTimelineItem>
         <MudTimelineItem>
             <MudText Align="Align.Center">Education</MudText>
@@ -63,23 +64,53 @@ else
                             <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                         </ToolBarContent>
                         <HeaderContent>
+                            <MudTh></MudTh>
                             <MudTh>Company Name</MudTh>
                             <MudTh>Position</MudTh>
                             <MudTh>Start Date</MudTh>
                             <MudTh>End Date</MudTh>
-                            <MudTh>Actions</MudTh>
+                            <MudTh>Skills</MudTh>
+                            <MudTh></MudTh>
                         </HeaderContent>
                         <RowTemplate>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" Color="Color.Error" OnClick="() => DeleteWorkHistory(context.Id)" />
+                            </MudTd>
                             <MudTd>@context.CompanyName</MudTd>
                             <MudTd>@context.Position</MudTd>
-                            <MudTd>@context.StartDate</MudTd>
-                            <MudTd>@context.EndDate</MudTd>
+                            <MudTd>@context.StartDate.Value.ToString("d")</MudTd>
+                            <MudTd>@context.EndDate.Value.ToString("d")</MudTd>
                             <MudTd>
-                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" OnClick="() => DeleteWorkHistory(context.Id)">Delete</MudButton>
+                                @foreach (var item in context.Skills)
+                                {
+                                    //switch color based on skill level
+                                    var color = item.SkillLevel switch
+                                    {
+                                        "Beginner" => MudBlazor.Color.Error,
+                                        "Intermediate" => MudBlazor.Color.Warning,
+                                        "Advanced" => MudBlazor.Color.Success,
+                                        _ => MudBlazor.Color.Primary
+                                    };
+
+
+                                    <MudChip T="string" Color="color" OnClick="() => EditSkill(context.Id,item.Id)">@item.SkillName</MudChip>
+                                }
+                            </MudTd>
+                            <MudTd>
+                                <MudButton Variant="MudBlazor.Variant.Text" Color="Color.Warning" OnClick="() => AddSkill(context.Id)">Add Skill</MudButton>
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
                 </MudPaper>
+                @*Next Button*@
+                <MudPaper Elevation="4" Class="p-3 mt-3">
+                    <MudGrid Justify="Justify.FlexEnd">
+                        <MudItem>
+                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/language-data/{Id}" )'>Next</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+   
             </div>
         </div>
     </main>
@@ -98,6 +129,7 @@ else
     public WorkHistoryDTO WorkHistory { get; set; } = new WorkHistoryDTO();
 
     public IEnumerable<WorkHistoryDTO> WorkHistories = new List<WorkHistoryDTO>();
+    public IEnumerable<SkillDTO> Skills = new List<SkillDTO>();
 
     public InitialStageDTO Application { get; set; } = new InitialStageDTO();
 
@@ -117,6 +149,7 @@ else
     private async Task LoadWorkHistory()
     {
         WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(Id);
+        Skills = await _skill.GetAll();
     }
 
     private async Task DeleteWorkHistory(int id)
@@ -151,11 +184,50 @@ else
 
     }
 
-    private async Task Submit()
+    // Add Skill
+    private async Task AddSkill(int id)
     {
-        WorkHistory.AppId = Id;
-        await _work.AddWorkHistoryAsync(WorkHistory);
-        _snackbar.Add("Work History Added", Severity.Success);
-        await LoadWorkHistory();
+        var parameters = new DialogParameters<AddSkill>
+        {
+            { x => x.WorkId, id},
+            { x => x.Color, Color.Error },
+            { x => x.IsNew, true }
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddSkill>("Add Skill", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadWorkHistory();
+            _snackbar.Add("Skill Added", Severity.Success);
+        }
+
+    }
+
+    // Edit Skill
+    private async Task EditSkill(int id, int skillId)
+    {
+        var parameters = new DialogParameters<AddSkill>
+        {
+            { x => x.WorkId, id},
+            { x => x.Color, Color.Error },
+            { x => x.IsNew, false },
+            { x => x.SkillId, skillId}
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddSkill>("Edit Skill", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadWorkHistory();
+            _snackbar.Add("Skill Edited", Severity.Success);
+        }
+
     }
 }

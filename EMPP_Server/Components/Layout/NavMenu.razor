@@ -1,5 +1,5 @@
-﻿
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
+
 
 
 <MudNavMenu Class="mud-width-full">
@@ -7,8 +7,14 @@
     <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">DEVAC.CA</MudText>
     <MudDivider Class="my-2" />
     <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="/applications" Icon="@Icons.Material.Filled.List">Application List</MudNavLink>
-    <MudNavLink Href="/myPortal" Icon="@Icons.Material.Filled.Dashboard">My Portal</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/myPortal" Icon="@Icons.Material.Filled.Dashboard">My Portal</MudNavLink>
+            <MudNavLink Href="/applications" Icon="@Icons.Material.Filled.List">Application List</MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+        </NotAuthorized>
+    </AuthorizeView>
     <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
         <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People" IconColor="Color.Success">Users</MudNavLink>
         <MudNavLink Href="/security" Icon="@Icons.Material.Filled.Security" IconColor="Color.Info">Security</MudNavLink>

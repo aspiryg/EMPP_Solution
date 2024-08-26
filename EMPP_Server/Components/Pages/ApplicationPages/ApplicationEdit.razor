@@ -31,6 +31,9 @@
             <MudText Align="Align.Center">Work History</MudText>
         </MudTimelineItem>
         <MudTimelineItem>
+            <MudText Align="Align.Center">Language Data</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem>
             <MudText Align="Align.Center">Education</MudText>
         </MudTimelineItem>
     </MudTimeline>
@@ -56,9 +59,6 @@ else
                             </MudItem>
                             <MudItem>
                                 <MudText Typo="Typo.h5">Applicant Name: @($"{Application.FirstName} {Application.LastName}")</MudText>
-                                <MudText Typo="Typo.h6">Application Id: @Application.Id</MudText>
-                                <MudText Typo="Typo.h6">Main Info: @MainInfo.InitialStageId</MudText>
-                                <MudText Typo="Typo.h6">Main Info Id: @MainInfo.Id</MudText>
                             </MudItem>
                         </MudGrid>
                     </MudItem>
@@ -257,6 +257,13 @@ else
         await LoadApplication();
         await GetCurrentUser();
         await GetCountryNamesAsync();
+        await Task.Delay(250);
+        MainInfo.FirstName = Application.FirstName;
+        MainInfo.LastName = Application.LastName;
+        if (MainInfo.InitialStageId != 0)
+        {
+            IsNew = false;
+        }
         IsLoading = false;
     }
 
@@ -266,19 +273,6 @@ else
         {
             Application = await _initial.GetApplicationById(appId);
             MainInfo = await _MainInfo.GetMainInfoByAppId(appId);
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            MainInfo.FirstName = Application.FirstName;
-            MainInfo.LastName = Application.LastName;
-            if (MainInfo.InitialStageId != 0)
-            {
-                IsNew = false;
-            }
         }
     }
 

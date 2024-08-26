@@ -57,6 +57,9 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IMainInfoRepo, MainInfoRepo>();
 builder.Services.AddScoped<IWorkHistoryRepo, WorkHistoryRepo>();
 builder.Services.AddScoped<IInitialStage, InitialStageRepo>();
+builder.Services.AddScoped<ISkillRepo, SkillRepo>();
+builder.Services.AddScoped<ILanguageData, LanguageDataRepo>();
+builder.Services.AddScoped<ILanguageTestRepo, LanguageTestRepo>();
 
 // Add services.
 builder.Services.AddScoped<IGeneInfo, GeneInfoRepo>();

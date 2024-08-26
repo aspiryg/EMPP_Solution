@@ -32,6 +32,17 @@ namespace DataModels.ApplicationModels
         public bool HasPreviousApplication { get; set; }
         public string PreviousApplicationDetails { get; set; } = string.Empty;
 
+
+
+        // Foreign Key for the User
+        public string UserId { get; set; } = string.Empty;
+
+        // Navigation Property for Work History
+        public ICollection<WorkHistoryDTO> WorkHistories { get; set; } = [];
+
+        // one to one relationship with LanguageData
+        public LanguageDataDTO LanguageData { get; set; }
+
         // System Information
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
@@ -40,11 +51,5 @@ namespace DataModels.ApplicationModels
         public bool IsDeleted { get; set; }
         public DateTime? DeletedDate { get; set; }
         public bool IsActive { get; set; }
-
-        // Foreign Key for the User
-        public string UserId { get; set; } = string.Empty;
-
-        // Navigation Property for Work History
-        public ICollection<WorkHistoryDTO> WorkHistories { get; set; } = [];
     }
 }
