@@ -117,7 +117,7 @@ else
                             </RadzenRow>
                         </RadzenStack>
                     </RadzenFieldset>
-                    <RadzenFieldset Text="Confirming the information provided is true and accurate">
+                    <RadzenFieldset Text="Data Accuracy">
                         <RadzenStack Gap="1rem">
                             <RadzenRow AlignItems="Radzen.AlignItems.Center">
                                 <RadzenColumn Size="12" SizeMD="12">
@@ -302,7 +302,7 @@ else
         <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4" AlignItems="Radzen.AlignItems.End" JustifyContent="JustifyContent.End">
 
             <button type="submit" class="btn btn-primary">Save and Exit</button>
-            <button type="submit" class="btn btn-success">Next</button>
+            <button type="button" class="btn btn-success" @onclick = '() => _nav.NavigateTo($"/application/create/{applicationId}")'>Next</button>
             <button type="button" class="btn btn-danger" @onclick="Cancel">Cancel</button>
 
             @*             <RadzenButton ButtonType="Radzen.ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Variant="Radzen.Variant.Flat" Text="Save and Exit" Click="()=>SaveApplication(1)" Style="margin-right: 1rem;" />

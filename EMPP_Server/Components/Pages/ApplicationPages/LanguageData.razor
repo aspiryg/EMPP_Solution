@@ -1,5 +1,6 @@
 ﻿@page "/language-data/{appId:int}"
 @using DataModels.ApplicationModels
+@using EMPP_Server.Components.Pages.Comp
 @using EMPP_Server.Data
 @using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
 @using EMPP_Server.Infrastructure.Repositories.IRepo
@@ -13,6 +14,7 @@
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider _auth
 @inject IGeneInfo _geneInfo
+@inject IDialogService DialogService
 
 <PageTitle>Language Data</PageTitle>
 
@@ -61,52 +63,344 @@ else
     @*Form*@
     <MudPaper Elevation="4" Class="p-3">
         <MudText Typo="Typo.h6">Language Data</MudText>
-        <MudGrid>
-            <MudItem xs="12" sm="6">
-                <MudSelect Margin="Margin.Dense" Label="Applicant Mother Language" @bind-Value="languageData.ApplicantLanguage" Variant="MudBlazor.Variant.Outlined">
-                    @foreach (var language in languageList)
-                    {
-                        <MudSelectItem Value="@language">@language</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudText> Do you speak one of these languages beside your mother lounge</MudText>
-                <RadzenCheckBoxList TValue="string" @bind-Value="languageData.SecondLanguages" AllowSelectAll="false" Data="@_secondLanguage" Style="width: 100%;" Name="SecondLanguage">
+        <EditForm Model="@languageData" OnValidSubmit="SaveLanguageData">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudSelect Margin="Margin.Dense" Label="Applicant Mother Language" @bind-Value="languageData.ApplicantLanguage" Variant="MudBlazor.Variant.Outlined">
+                        @foreach (var language in languageList)
+                        {
+                            <MudSelectItem Value="@language">@language</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <ValidationMessage For="@(() => languageData.ApplicantLanguage)" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText> Do you speak one of these languages beside your mother lounge</MudText>
+                    <RadzenCheckBoxList TValue="string" @bind-Value="languageData.SecondLanguages" AllowSelectAll="false" Data="@_secondLanguage" Style="width: 100%;" Name="SecondLanguage">
 
-                </RadzenCheckBoxList>
-                @*                     <MudText>Values: @string.Join(", ", languageData.SecondLanguages ?? new List<string>())</MudText> *@
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudInputLabel>Which of the following approved English language tests you have done over the last two years?</MudInputLabel>
-                <MudSelect Margin="Margin.Dense" Label="English Test" @bind-Value="languageData.EngApprovedTest" Variant="MudBlazor.Variant.Outlined">
-                    @foreach (var test in EnglishTests)
-                    {
-                        <MudSelectItem Value="@test">@test</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                @*a Matrix to take rating inputs on 4 different Variables: CELPIPReading , CELPIPWriting , CELPIPSpeaking , CELPIPListening *@
-                <MudText>Rate your English language proficiency on the following variables</MudText>
-                <MudGrid>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField Label="CELPIP Reading" @bind-Value="languageData.CELPIPReading" Variant="MudBlazor.Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField Label="CELPIP Writing" @bind-Value="languageData.CELPIPWriting" Variant="MudBlazor.Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField Label="CELPIP Speaking" @bind-Value="languageData.CELPIPSpeaking" Variant="MudBlazor.Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField Label="CELPIP Listening" @bind-Value="languageData.CELPIPListening" Variant="MudBlazor.Variant.Outlined" />
-                    </MudItem>
-                    </MudGrid>
+                    </RadzenCheckBoxList>
+                    @*                     <MudText>Values: @string.Join(", ", languageData.SecondLanguages ?? new List<string>())</MudText> *@
+                </MudItem>
+            </MudGrid>
 
-            </MudItem>
-        </MudGrid>
+            <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Which of the following <a class="link-primary" href="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/language-requirements/language-testing.html" target="_blank">approved English language tests</a> you have done over the last two years?</MudInputLabel>
+                    <MudSelect Margin="Margin.Dense" Label="English Test" @bind-Value="languageData.EngApprovedTest" Variant="MudBlazor.Variant.Outlined">
+                        @foreach (var test in EnglishTests)
+                        {
+                            <MudSelectItem Value="@test">@test</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                @*CELPIP-General score*@
+                @if (languageData.EngApprovedTest == "CELPIP-General")
+                {
+                    <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4 ms-3">
+                        <RadzenColumn Size="12" SizeMD="12">
+                            <RadzenStack Gap="1rem">
+                                <RadzenFieldset Text="CELPIP Score">
+                                    <MudItem xs="12" sm="12">
+                                        <MudText>What is your language test score rate?</MudText>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="6">
+                                                <MudText>CELPIP Reading | <span class="text-primary">@(languageData.CELPIPReading != string.Empty ? $"Value: {languageData.CELPIPReading}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.CELPIPReading">
+                                                    @foreach (var label in CELPIPLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="6">
+                                                <MudText>CELPIP Writing | <span class="text-primary">@(languageData.CELPIPWriting != string.Empty ? $"Value: {languageData.CELPIPWriting}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.CELPIPWriting">
+                                                    @foreach (var label in CELPIPLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="6">
+                                                <MudText>CELPIP Listening | <span class="text-primary">@(languageData.CELPIPListening != string.Empty ? $"Value: {languageData.CELPIPListening}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.CELPIPListening">
+                                                    @foreach (var label in CELPIPLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="6">
+                                                <MudText>CELPIP Speaking | <span class="text-primary">@(languageData.CELPIPSpeaking != string.Empty ? $"Value: {languageData.CELPIPSpeaking}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.CELPIPSpeaking">
+                                                    @foreach (var label in CELPIPLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </RadzenFieldset>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+                @*IELTS General Training Score*@
+                @if (languageData.EngApprovedTest == "IELTS General Training")
+                {
+                    <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4 ms-3">
+                        <RadzenColumn Size="12" SizeMD="12">
+                            <RadzenStack Gap="1rem">
+                                <RadzenFieldset Text="IELTS General Training Score">
+                                    <MudItem xs="12" sm="12">
+                                        <MudText>What is your language test score rate?</MudText>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>IELTS General Training Reading | <span class="text-primary">@(languageData.IELTSReading != string.Empty ? $"Value: {languageData.IELTSReading}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.IELTSReading">
+                                                    @foreach (var label in IELTSLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>IELTS General Training Writing | <span class="text-primary">@(languageData.IELTSWriting != string.Empty ? $"Value: {languageData.IELTSWriting}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.IELTSWriting">
+                                                    @foreach (var label in IELTSLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>IELTS General Training Listening | <span class="text-primary">@(languageData.IELTSListening != string.Empty ? $"Value: {languageData.IELTSListening}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.IELTSListening">
+                                                    @foreach (var label in IELTSLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>IELTS General Training Speaking | <span class="text-primary">@(languageData.IELTSSpeaking != string.Empty ? $"Value: {languageData.IELTSSpeaking}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.IELTSSpeaking">
+                                                    @foreach (var label in IELTSLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </RadzenFieldset>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+
+                @*PTE Core Score*@
+                @if (languageData.EngApprovedTest == "PTE Core")
+                {
+                    <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4 ms-3">
+                        <RadzenColumn Size="12" SizeMD="12">
+                            <RadzenStack Gap="1rem">
+                                <RadzenFieldset Text="PTE Core Score">
+                                    <MudItem xs="12" sm="12">
+                                        <MudText>What is your language test score rate?</MudText>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>PTE Core Reading | <span class="text-primary">@(languageData.PTEReading != string.Empty ? $"Value: {languageData.PTEReading}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.PTEReading">
+                                                    @foreach (var label in PTELabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                                <ValidationMessage For="@(() => languageData.PTEReading)" />
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>PTE Core Writing | <span class="text-primary">@(languageData.PTEWriting != string.Empty ? $"Value: {languageData.PTEWriting}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.PTEWriting">
+                                                    @foreach (var label in PTELabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>PTE Core Listening | <span class="text-primary">@(languageData.PTEListening != string.Empty ? $"Value: {languageData.PTEListening}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.PTEListening">
+                                                    @foreach (var label in PTELabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>PTE Core Speaking | <span class="text-primary">@(languageData.PTESpeaking != string.Empty ? $"Value: {languageData.PTESpeaking}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.PTESpeaking">
+                                                    @foreach (var label in PTELabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </RadzenFieldset>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </MudGrid>
+
+            <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+            <MudGrid>
+                <MudItem xs="12" sm="12">
+                    <MudInputLabel>Have you done the <a class="link-primary" href="https://www.duolingo.com/" target="_blank">Duolingo</a> language test within the last 2 years?</MudInputLabel>
+                    <MudAlert Severity="Severity.Warning">The Due Lingo language test results are <span class="fw-bold">NOT</span> approved when submitting your application; however, it gives us insights about your ESL level.</MudAlert>
+                    <MudRadioGroup @bind-Value="languageData.DoneDueLingo">
+                        <MudRadio Value="true" Color="Color.Primary">Yes</MudRadio>
+                        <MudRadio Value="false" Color="Color.Error">No</MudRadio>
+                    </MudRadioGroup>
+                </MudItem>
+                @*DuaLingo score*@
+                @if (languageData.DoneDueLingo)
+                {
+                    <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4 ms-3">
+                        <RadzenColumn Size="12" SizeMD="12">
+                            <RadzenStack Gap="1rem">
+                                <RadzenFieldset Text="DuaLingo Score">
+                                    <MudItem xs="12" sm="12">
+                                        <MudText>What is your language test score?</MudText>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>DuaLingo Reading | <span class="text-primary">@(languageData.DueLingoReading != string.Empty ? $"Value: {languageData.DueLingoReading}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.DueLingoReading">
+                                                    @foreach (var label in DuaLingoLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>DuaLingo Writing | <span class="text-primary">@(languageData.DueLingoWriting != string.Empty ? $"Value: {languageData.DueLingoWriting}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.DueLingoWriting">
+                                                    @foreach (var label in DuaLingoLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>DuaLingo Listening | <span class="text-primary">@(languageData.DueLingoListening != string.Empty ? $"Value: {languageData.DueLingoListening}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.DueLingoListening">
+                                                    @foreach (var label in DuaLingoLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="12">
+                                                <MudText>DuaLingo Speaking | <span class="text-primary">@(languageData.DueLingoSpeaking != string.Empty ? $"Value: {languageData.DueLingoSpeaking}" : "")</span></MudText>
+                                                <MudRadioGroup @bind-Value="@languageData.DueLingoSpeaking">
+                                                    @foreach (var label in DuaLingoLabels)
+                                                    {
+                                                        <MudRadio Value="@label" Color="Color.Primary">@label</MudRadio>
+                                                    }
+                                                </MudRadioGroup>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </RadzenFieldset>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+
+                <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Which of the following <a class="link-primary" href="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/language-requirements/language-testing.html" target="_blank">approved French language tests</a> you have done over the last two years?</MudInputLabel>
+                    <MudSelect Margin="Margin.Dense" Label="French Test" @bind-Value="languageData.FrenchApprovedTest" Variant="MudBlazor.Variant.Outlined">
+                        @foreach (var test in FrenchTests)
+                        {
+                            <MudSelectItem Value="@test">@test</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+            <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+            <MudGrid Justify="Justify.FlexEnd">
+                <MudItem>
+                    <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton Variant="MudBlazor.Variant.Outlined" Color="Color.Error" OnClick='() => _nav.NavigateTo("/")'>Cancel</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
     </MudPaper>
+
+    <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+
+    <MudCard>
+        <MudCardHeader>
+            <MudGrid Justify="Justify.SpaceBetween">
+                <MudItem>
+                    <MudText Typo="Typo.h6">Language Tests</MudText>
+                </MudItem>
+                <MudItem>
+                    <MudButton Disabled="!isEditing" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='AddLanguageTest'>Add Language Test</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTable Items="@languageTests" TItem="LanguageTestDTO">
+                <HeaderContent>
+                    <MudTh>Test</MudTh>
+                    <MudTh>Test Date</MudTh>
+                    <MudTh>Test Score</MudTh>
+                    <MudTh>Is Valid</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.TestType</MudTd>
+                    <MudTd>
+                        @((context.TestDate != null) ? context.TestDate.Value.ToString("d") : "")
+                    </MudTd>
+                    <MudTd>
+                        Ave: @context.AverageTestScore()
+                    </MudTd>
+                    <MudTd>
+                        @if (context.SetTestLessThanTwoYears())
+                        {
+                            <MudChip T="string" Color="Color.Surface">Valid</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Color="Color.Error">Invalid</MudChip>
+                        }
+                       
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditLanguageTest(context.Id)" />
+                        <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteTest(context.Id)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+
 
     @*Table for the languages*@
 }
@@ -122,6 +416,21 @@ else
 
     private IEnumerable<string> _secondLanguage = new[] { "English", "French", "Other" };
     public string OtherLanguage { get; set; } = string.Empty;
+
+    public List<string> EnglishTests { get; set; } = new List<string> { "CELPIP-General", "IELTS General Training", "PTE Core", "None of the above" };
+    public List<string> FrenchTests { get; set; } = new List<string> { "TEF Canada", "TCF Canada", "None of the above" };
+
+
+    string[] CELPIPLabels = new string[] { "1", "2", "3", "4", "5", "6", "7 or more" };
+
+    string[] IELTSLabels = new string[] { "Less than 3", "3", "4", "4.5", "5", "5.5", "6 or more" };
+
+    string[] PTELabels = new string[] { "Less than 24", "24-32", "33-41", "42-50", "51-59", "60 and over" };
+
+    string[] DuaLingoLabels = new string[] { "Less than 55", "55-64", "65-74", "75-7-84", "85-94", "95 and more" };
+
+
+
 
     // Data Models
 
@@ -204,8 +513,63 @@ else
         languageList = await _geneInfo.GetALLLanguages();
     }
 
-    // a new list of English language approved tests. Initiated with Data
-    public List<string> EnglishTests { get; set; } = new List<string> { "CELPIP-General", "IELTS General Training", "PTE Core", "None of the above" };
+    // Show the Add test dialog
+    private async Task AddLanguageTest()
+    {
+        var parameters = new DialogParameters
+        {
+            { "LanguageDataId", languageData.Id },
+            { "Color", Color.Error },
+            { "IsNew", true },
+            { "TestId", 0 }
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddLanguageTest>("Add Language Test", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadLanguagesData();
+            _snackBar.Add("Language Test Added", Severity.Success);
+        }
+    }
+
+    // Show the Edit test dialog
+    private async Task EditLanguageTest(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "LanguageDataId", languageData.Id },
+            { "Color", Color.Error },
+            { "IsNew", false },
+            { "TestId", id }
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddLanguageTest>("Edit Language Test", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadLanguagesData();
+            _snackBar.Add("Language Test Updated", Severity.Success);
+        }
+    }
+
+
+    // Delete Test
+    private async Task DeleteTest(int id)
+    {
+        bool confirmed = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await _languageTest.DeleteLanguageTestAsync(id);
+        }
+        await LoadLanguagesData();
+    }
 
 
     // Dispose

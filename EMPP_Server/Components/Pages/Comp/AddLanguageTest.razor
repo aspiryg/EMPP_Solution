@@ -1,0 +1,169 @@
+﻿@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject ILanguageTestRepo _languageTest
+@inject IJSRuntime _js
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h5">@(IsNew ? "Add" : "Edit") Language Test</MudText>
+        <MudText Typo="Typo.body2">Application Id: @LanguageDataId</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="LanguageTest" OnValidSubmit="AddTestRecord">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudSelect Label="Language" @bind-Value="LanguageTest.Language" @onclick='() => GetTestType("")' Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var language in languagesList)
+                {
+                    <MudSelectItem Value=@language Label=@language />
+                }
+            </MudSelect>
+            <ValidationMessage For="@(() => LanguageTest.Language)" />
+
+            <MudSelect Label="Test Type" @bind-Value="LanguageTest.TestType" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var testType in GetTestType(LanguageTest.Language))
+                {
+                    <MudSelectItem Value=@testType Label=@testType />
+                }
+            </MudSelect>
+            <ValidationMessage For="@(() => LanguageTest.TestType)" />
+            <RadzenRow>
+                <RadzenColumn>
+                    <RadzenStack Gap="1rem">
+                        <RadzenFieldset Text="Test Score">
+                            <MudGrid>
+                                <MudItem sm="12" md="6">
+                                    <MudInputLabel>Reading</MudInputLabel>
+                                    <MudNumericField @bind-Value="LanguageTest.Reading" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                                    <ValidationMessage For="@(() => LanguageTest.Reading)" />
+                                </MudItem>
+                                <MudItem sm="12" md="6">
+                                    <MudInputLabel>Listening</MudInputLabel>
+                                    <MudNumericField @bind-Value="LanguageTest.Listening" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                                    <ValidationMessage For="@(() => LanguageTest.Listening)" />
+                                </MudItem>
+                                <MudItem sm="12" md="6">
+                                    <MudInputLabel>Writing</MudInputLabel>
+                                    <MudNumericField @bind-Value="LanguageTest.Writing" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                                    <ValidationMessage For="@(() => LanguageTest.Writing)" />
+                                </MudItem>
+                                <MudItem sm="12" md="6">
+                                    <MudInputLabel>Speaking</MudInputLabel>
+                                    <MudNumericField @bind-Value="LanguageTest.Speaking" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+                                    <ValidationMessage For="@(() => LanguageTest.Speaking)" />
+                                </MudItem>
+                            </MudGrid>
+                        </RadzenFieldset>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <MudDatePicker Label="Test Date" @bind-Date="LanguageTest.TestDate" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+            <ValidationMessage For="@(() => LanguageTest.TestDate)" />
+
+            @*Test Link*@
+            <MudTextField Label="Test Link" @bind-Value="LanguageTest.TestLink" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+            <a href="@LanguageTest.TestLink" target="_blank">Test Link</a>
+            @*Test Certificate*@
+            <MudTextField Label="Test Certificate" @bind-Value="LanguageTest.TestFile" Variant="MudBlazor.Variant.Outlined" Margin="Margin.Dense" />
+
+
+            <MudButton ButtonType="MudBlazor.ButtonType.Submit" Color="Color.Primary">Submit</MudButton>
+            @if (!IsNew)
+            {
+                <MudButton Color="Color.Secondary" OnClick="() => DeleteTest(TestId)">Delete</MudButton>
+            }
+
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    public LanguageTestDTO LanguageTest { get; set; } = new LanguageTestDTO();
+
+    [Parameter]
+    public int LanguageDataId { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public int TestId { get; set; }
+
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsNew)
+        {
+            LanguageTest = await _languageTest.GetLanguageTestByIdAsync(TestId);
+        }
+    }
+
+    public async Task AddTestRecord()
+    {
+        LanguageTest.LanguageDataId = LanguageDataId;
+        if (IsNew)
+        {
+            await _languageTest.AddLanguageTestAsync(LanguageTest);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            await _languageTest.UpdateLanguageTestAsync(LanguageTest);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    // Delete Test with confirmation
+    public async Task DeleteTest(int id)
+    {
+        bool confirmed = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await _languageTest.DeleteLanguageTestAsync(id);
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    // Initiate a list of string for the Language dropdown
+    string[] languagesList = new string[] { "English", "French" };
+
+    // Initiate a list of string for the Test Type dropdown
+    class TestType
+    {
+        public string language { get; set; }
+        public string Name { get; set; }
+    }
+
+    List<TestType> testTypes = new List<TestType>
+    {
+        new TestType { language = "English", Name = "IELTS" },
+        new TestType { language = "English", Name = "TOEFL" },
+        new TestType { language = "English", Name = "PTE" },
+        new TestType { language = "French", Name = "TEF" },
+        new TestType { language = "French", Name = "TCF" },
+        new TestType { language = "French", Name = "DELF" },
+        new TestType { language = "French", Name = "DALF" }
+    };
+
+    // Get the Test Type based on the selected Language
+    List<string> GetTestType(string language)
+    {
+        return testTypes.Where(x => x.language == language).Select(x => x.Name).ToList();
+    }
+}
