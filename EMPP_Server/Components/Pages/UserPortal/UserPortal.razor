@@ -1,5 +1,7 @@
 ﻿@page "/myPortal"
-@page "/userPortal/{userId}"
+@page "/myPortal/{AppId:int}"
+
+
 @using DataModels.ApplicationModels
 @using EMPP_Server.Data
 @using EMPP_Server.Infrastructure.Repositories.IMainInfoRepo
@@ -31,6 +33,11 @@
 }
 else
 {
+    <MudContainer>
+        <MudText Typo="Typo.h4">Welcome to the User Portal</MudText>
+        <MudText Typo="Typo.body1">This is your personal portal where you can view your application information.</MudText>
+        <MudText Typo="Typo.body1">@CurrentUser.Id</MudText>
+        </MudContainer>
     <MudPaper Elevation="4" Class="p-3">
         <MudGrid Justify="Justify.SpaceBetween">
             <MudItem>
@@ -94,7 +101,7 @@ else
 
 @code {
     [Parameter]
-    public string userId { get; set; }
+    public int AppId { get; set; }
 
     public string searchString1 { get; set; }
 
@@ -127,28 +134,19 @@ else
 
     public async Task LoadApplication()
     {
-        var applications = await _initial.GetAllApplicationsByUserId(CurrentUser.Id);
-        if (applications.Any())
-        {
-            var app = applications.FirstOrDefault();
-
-            if (app != null)
-            {
-                InitialStage = app;
-            }
-        }
+        InitialStage = await _initial.GetApplicationById(AppId);
         Main = await _main.GetMainInfoByAppId(InitialStage.Id);
     }
 
     public async Task LoadWorkHistory()
     {
-        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(InitialStage.Id);
+        WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(AppId);
     }
 
     public async Task LoadLanguageData()
     {
-        LanguageData = await _languageData.GetLanguageByAppIdAsync(InitialStage.Id);
-        LanguageTests = await _languageTest.GetLanguageTestsByAppIdAsync(InitialStage.Id);
+        LanguageData = await _languageData.GetLanguageByAppIdAsync(AppId);
+        LanguageTests = await _languageTest.GetLanguageTestsByAppIdAsync(AppId);
     }
 
     // Get the current user

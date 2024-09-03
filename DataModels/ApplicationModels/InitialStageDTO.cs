@@ -10,6 +10,14 @@ namespace DataModels.ApplicationModels
     {
         public int Id { get; set; }
         public Guid ApplicationNumber { get; set; } = Guid.NewGuid();
+
+        public string ApplicationMainCategory { get; set; } = string.Empty; // Immigration, Volunteer, Both, Other
+        public string ApplicationSubCategory { get; set; } = string.Empty; // Permanent Residence, Work Permit, Study Permit, Visitor Visa, Refugee Claim, Volunteer, Other
+        public string ApplicationType { get; set; } = string.Empty; // Federal, Quebec, Provincial, Refugee, Volunteer, Other
+        public string ApplicationStatus { get; set; } = string.Empty; // In Progress, Submitted, Approved, Rejected, Other
+        public string ApplicationStage { get; set; } = string.Empty; // Initial, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth, Other
+
+        // Personal Information
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

@@ -15,47 +15,60 @@
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @context.User.Identity?.Name!</h1>
-        <p>Here are your current applications:</p>
-        @if (Applications.Any())
-        {
-            <table class="table table-active">
-                <thead>
-                    <tr>
-                        <th>Application Number</th>
-                        <th>Application Type</th>
-                        <th>Application Status</th>
-                        <th>Application Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var application in Applications)
-                    {
+        <MudCard Elevation="4" Class="p-3">
+            <MudCardHeader>
+                <MudAvatar Color="Color.Primary">
+                    <MudIcon Icon="@MudBlazor.Icons.Material.Filled.Home" />
+                </MudAvatar>
+                <MudDivider DividerType="DividerType.Middle" />
+                <MudText Typo="Typo.h4">Welcome to the EMPP Helper</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body1">The EMPP (The Economic Mobility Pathways Pilot) is a pilot program that helps skilled refugees and other displaced people immigrate to Canada. The program is designed to help you find a job in Canada that matches your skills and experience.</MudText>
+            </MudCardContent>
 
-                        <tr>
-                            <td>@application.ApplicationNumber</td>
-                            <td></td>
-                            <td>In Process</td>
-                            <td>@application.CreatedDate</td>
-                            <td>
-                                <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => ResumeApplication(UserId,application.Id)" />
-                                <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteApplication(application.Id)" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>You have no applications.</p>
-        }
+            <MudCardActions>
+                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="StartApplication">Start Application</MudButton>
+            </MudCardActions>
+        </MudCard>
+        <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+        <MudPaper Elevation="4" Class="p-3">
+            @*Three main elements in the screen (Applications Portal, Communications, Profile)*@
+            <MudGrid Justify="Justify.SpaceBetween">
+                <MudItem>
+                    <MudText Typo="Typo.h5">Applications Portal</MudText>
+                </MudItem>
+                @*Applications Portal*@
+                <MudItem>
+                    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/UserPortal")'>View</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+        <MudPaper Elevation="4" Class="p-3">
+            <MudGrid Justify="Justify.SpaceBetween">
+                <MudItem>
+                    <MudText Typo="Typo.h5">Communications</MudText>
+                </MudItem>
+                @*Communications*@
+                <MudItem>
+                    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/Communications")'>View</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+        <MudPaper Elevation="4" Class="p-3">
+            <MudGrid Justify="Justify.SpaceBetween">
+                <MudItem>
+                    <MudText Typo="Typo.h5">Profile</MudText>
+                </MudItem>
+                @*Profile*@
+                <MudItem>
+                    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/Profile")'>View</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
 
-        <p>Click the button below to start a new application.</p>
-        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="StartApplication">Start Application</MudButton>
-        <p>Or click the button below to register.</p>
-        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" OnClick="RegisterNow">Register</MudButton>
     </Authorized>
     <NotAuthorized>
         @*if you have an account login to your account or register*@
@@ -70,16 +83,6 @@
 
 @code {
 
-    public InitialStageDTO Application { get; set; } = new InitialStageDTO();
-
-    public IEnumerable<InitialStageDTO> Applications { get; set; } = new List<InitialStageDTO>();
-
-    private async Task LoadApplications()
-    {
-        var allApps = await _initial.GetAllApplicationsByUserId(UserId);
-        // Check if applications is not IsDeleted
-        Applications = allApps.Where(x => x.IsDeleted == false).ToList();
-    }
 
     private void RegisterNow()
     {
@@ -88,7 +91,7 @@
 
     private void StartApplication()
     {
-        _nav.NavigateTo("/Intake");
+        _nav.NavigateTo("/startApplication");
     }
 
     public string UserId { get; set; }
@@ -115,21 +118,5 @@
     protected override async Task OnInitializedAsync()
     {
         await GetUserId();
-        await LoadApplications();
-    }
-
-    private async Task DeleteApplication(int id)
-    {
-        var confirm = await _Js.InvokeAsync<bool>("confirm", "Are you sure you want to delete this application?");
-        if (confirm)
-        {
-            await _initial.DeleteApplication(id);
-            await LoadApplications();
-        }
-    }
-
-    private void ResumeApplication(string userId, int id)
-    {
-        _nav.NavigateTo($"/Intake/{userId}&{id}");
     }
 }

@@ -1,0 +1,108 @@
+﻿@page "/startApplication"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Data
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using Microsoft.AspNetCore.Identity
+
+@inject NavigationManager _nav
+@inject IJSRuntime _Js
+@inject IInitialStage _initial
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
+
+<PageTitle>Start Application</PageTitle>
+<MudPaper Elevation="4" Class="p-3">
+    <MudGrid Justify="Justify.SpaceBetween">
+        <MudItem>
+            <MudText Typo="Typo.h5">Start Application</MudText>
+        </MudItem>
+        <MudItem>
+            
+            <MudButton Disabled="@(Application.ApplicationType == null || Application.ApplicationType == string.Empty)" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/intake")'>Next</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<MudDivider DividerType="DividerType.Middle" Class="my-2" />
+
+<MudPaper Elevation="4" Class="p-3">
+
+        <MudGrid Justify="Justify.Center">
+            <MudItem>
+                @*What Kind of application do you want to apply for*@
+                <MudText Typo="Typo.h6">What Kind of application do you want to apply for?</MudText>
+            </MudItem>
+        </MudGrid>
+        <MudGrid Justify="Justify.Center">
+            <MudItem>
+                <MudChipSet Size="Size.Large" T="string" SelectionMode="SelectionMode.ToggleSelection" CheckMark @bind-SelectedValue="Application.ApplicationType">
+                    <MudChip Text="Volunteer Application" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" />
+                    <MudChip Text="Immigration Application" Variant="MudBlazor.Variant.Filled" Color="Color.Success" />
+                    <MudChip Text="Both" Variant="MudBlazor.Variant.Filled" Color="Color.Info" />
+                </MudChipSet>
+            </MudItem>
+        </MudGrid>
+        <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+        <MudGrid Justify="Justify.Center">
+            <MudItem>
+                @if (Application.ApplicationType == "Volunteer Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null || Application.ApplicationType == "Both")
+                {
+                    <MudCard Elevation="1" Class="p-3">
+                        <MudCardHeader>
+                            <MudAvatar Color="Color.Primary">
+                                <MudIcon Icon="@MudBlazor.Icons.Material.Filled.Person" />
+                            </MudAvatar>
+                            <MudDivider DividerType="DividerType.Middle" />
+                            <MudText Typo="Typo.h6">Volunteer Application</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.body1">The Volunteer Application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudText>
+                            <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudAlert>
+                        </MudCardContent>
+                    </MudCard>
+                }
+                @if (Application.ApplicationType == "Immigration Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null || Application.ApplicationType == "Both")
+                {
+                    <MudCard Elevation="1" Class="p-3">
+                        <MudCardHeader>
+                            <MudAvatar Color="Color.Primary">
+                                <MudIcon Icon="@MudBlazor.Icons.Material.Filled.TravelExplore" />
+                            </MudAvatar>
+                            <MudDivider DividerType="DividerType.Middle" />
+                            <MudText Typo="Typo.h6">Immigration Application</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.body1"> The Migration Application is for individuals who want to immigrate to Canada.</MudText>
+                            <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to immigrate to Canada.</MudAlert>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            </MudItem>
+        </MudGrid>
+
+</MudPaper>
+
+@code {
+    public InitialStageDTO Application { get; set; } = new InitialStageDTO();
+
+    public ApplicationUser CurrentUser { get; set; } = new ApplicationUser();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrentUser();
+    }
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userObj = await _userManager.FindByEmailAsync(user.Identity.Name);
+            if (userObj != null)
+            {
+                CurrentUser = userObj;
+            }
+        }
+    }
+}
