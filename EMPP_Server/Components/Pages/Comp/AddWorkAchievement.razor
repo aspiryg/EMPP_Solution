@@ -1,0 +1,96 @@
+﻿@using DataModels.ApplicationModels
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using EMPP_Server.Infrastructure.Repositories.WorkHistoryRepo
+
+@inject IWorkAchievement _workAchievement
+@inject IJSRuntime _js
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h5">@(IsNew ? "Add" : "Edit") Work Achievement</MudText>
+        <MudText Typo="Typo.body2">Work Id: @WorkId</MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="WorkAchievement" OnValidSubmit="AddAchRecord">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Margin="Margin.Dense" Label="Achievement" @bind-Value="WorkAchievement.AchievementName" Variant="MudBlazor.Variant.Outlined" />
+                    <ValidationMessage For="@(() => WorkAchievement.AchievementName)" />
+                    <MudTextField AutoGrow Margin="Margin.Dense" Label="Description" @bind-Value="WorkAchievement.AchievementDescription" Variant="MudBlazor.Variant.Outlined" Lines="3" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Api" />
+                    <ValidationMessage For="@(() => WorkAchievement.AchievementDescription)" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" OnClick="AddAchRecord">Submit</MudButton>
+                    @if (!IsNew)
+                    {
+                        <MudButton Color="Color.Secondary" OnClick="() => DeleteWorkAchievement(WorkAcievementID)">Delete</MudButton>
+                    }
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    public WorkAchievementDTO WorkAchievement { get; set; } = new WorkAchievementDTO();
+
+    [Parameter]
+    public int WorkId { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public int WorkAcievementID { get; set; }
+
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsNew)
+        {
+            WorkAchievement = await _workAchievement.GetAsync(WorkAcievementID);
+        }
+    }
+
+    public async Task AddAchRecord()
+    {
+        WorkAchievement.WorkHistoryId = WorkId;
+        if (IsNew)
+        {
+            await _workAchievement.AddAsync(WorkAchievement);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            await _workAchievement.UpdateAsync(WorkAchievement);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    // Delete WorkAchievement with confirmation
+    public async Task DeleteWorkAchievement(int id)
+    {
+        bool confirmed = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await _workAchievement.DeleteAsync(id);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+}

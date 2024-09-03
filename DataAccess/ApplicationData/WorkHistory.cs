@@ -51,5 +51,8 @@ namespace DataAccess.ApplicationData
 
         // Navigation Property for Skill
         public ICollection<Skill> Skills { get; set; } = [];
+
+        // Navigation Property for WorkAchievement
+        public ICollection<WorkAchievement> WorkAchievements { get; set; } = [];
     }
 }

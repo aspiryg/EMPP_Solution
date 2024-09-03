@@ -37,7 +37,7 @@ else
         <MudText Typo="Typo.h4">Welcome to the User Portal</MudText>
         <MudText Typo="Typo.body1">This is your personal portal where you can view your application information.</MudText>
         <MudText Typo="Typo.body1">@CurrentUser.Id</MudText>
-        </MudContainer>
+    </MudContainer>
     <MudPaper Elevation="4" Class="p-3">
         <MudGrid Justify="Justify.SpaceBetween">
             <MudItem>
@@ -51,7 +51,7 @@ else
     <MudDivider DividerType="DividerType.Middle" Class="my-2" />
 
     <MudGrid>
-        <MudItem xs="12" sm="6" md="4">
+        <MudItem lg="12">
             <MudPaper Elevation="4" Class="p-3">
                 <MudText Typo="Typo.h6">Main Information</MudText>
                 <MudDivider />
@@ -64,22 +64,44 @@ else
                 <MudText Typo="Typo.body1">Zip: @Main.PostalCode</MudText>
             </MudPaper>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+    </MudGrid>
+    <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+    <MudGrid>
+        <MudItem lg="12">
             <MudPaper Elevation="4" Class="p-3">
-                <MudText Typo="Typo.h6">Work History</MudText>
+                <MudGrid Justify="Justify.SpaceBetween">
+                    <MudItem>
+                        <MudText Typo="Typo.h6">Work History</MudText>
+                    </MudItem>
+                    <MudItem>
+                        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/workhistory/edit/{AppId}")'>Add Experience</MudButton>
+                    </MudItem>
+                </MudGrid>
                 <MudDivider />
                 @foreach (var work in WorkHistories)
                 {
-                    <MudText Typo="Typo.body1">Company: @work.CompanyName</MudText>
-                    <MudText Typo="Typo.body1">Position: @work.Position</MudText>
-                    <MudText Typo="Typo.body1">Start Date: @work.StartDate</MudText>
-                    <MudText Typo="Typo.body1">End Date: @work.EndDate</MudText>
-                    <MudText Typo="Typo.body1">Description: @work.Skills</MudText>
+                    <MudCard Elevation="4" Class="m-2">
+
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">@work.CompanyName</MudText>
+                            <MudText Typo="Typo.body1">@work.Position</MudText>
+                            <MudText Typo="Typo.body1">@work.StartDate.Value.ToString("d") - @work.EndDate.Value.ToString("d")</MudText>
+                            <MudText Typo="Typo.body1">@work.JobDescription</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/workhistory/edit/{AppId}")'>Edit</MudButton>
+                            <MudButton Color="Color.Secondary" >Delete</MudButton>
+                        </MudCardActions>
+                        </MudCard>
                     <MudDivider />
                 }
             </MudPaper>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+    </MudGrid>
+    <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+
+    <MudGrid>
+        <MudItem lg="12">
             <MudPaper Elevation="4" Class="p-3">
                 <MudText Typo="Typo.h6">Language Data</MudText>
                 <MudDivider />
@@ -111,6 +133,7 @@ else
 
     public IEnumerable<WorkHistoryDTO> WorkHistories { get; set; } = new List<WorkHistoryDTO>();
     public IEnumerable<SkillDTO> Skills { get; set; } = new List<SkillDTO>();
+    public IEnumerable<WorkAchievementDTO> WorkAchievements { get; set; } = new List<WorkAchievementDTO>();
 
     public LanguageDataDTO LanguageData { get; set; } = new LanguageDataDTO();
     public IEnumerable<LanguageTestDTO> LanguageTests { get; set; } = new List<LanguageTestDTO>();

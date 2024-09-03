@@ -302,7 +302,7 @@ else
         <RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4" AlignItems="Radzen.AlignItems.End" JustifyContent="JustifyContent.End">
 
             <button type="submit" class="btn btn-primary">Save and Exit</button>
-            <button type="button" class="btn btn-success" @onclick = '() => _nav.NavigateTo($"/application/create/{applicationId}")'>Next</button>
+            <button disabled="@(Application.Id == 0)" type="button" class="btn btn-success" @onclick = '() => _nav.NavigateTo($"/application/create/{applicationId}")'>Next</button>
             <button type="button" class="btn btn-danger" @onclick="Cancel">Cancel</button>
 
             @*             <RadzenButton ButtonType="Radzen.ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Variant="Radzen.Variant.Flat" Text="Save and Exit" Click="()=>SaveApplication(1)" Style="margin-right: 1rem;" />
@@ -379,21 +379,32 @@ else
 
     private async Task SaveApplication()
     {
-        if (IsNew)
+        if (Application.ConfirmInformation && 
+            Application.TermsAndConditions && 
+            Application.PrivacyPolicy && 
+            Application.AgeConfirmation)
         {
-            await _initial.CreateApplication(Application);
-            _snackbar.Add("Application Created", Severity.Success);
+
+            if (IsNew)
+            {
+                await _initial.CreateApplication(Application);
+                _snackbar.Add("Application Created", Severity.Success);
+            }
+            else
+            {
+                await _initial.UpdateApplication(Application);
+                _snackbar.Add("Application Updated", Severity.Success);
+            }
+
+            var lastApplication = await _initial.GetLastApplication();
+            var applicationId = lastApplication.Id;
+
+            _nav.NavigateTo($"/application/create/{applicationId}");
         }
         else
         {
-            await _initial.UpdateApplication(Application);
-            _snackbar.Add("Application Updated", Severity.Success);
+            _snackbar.Add("Please confirm the information provided is true and accurate and that you have read and understood the terms and conditions", Severity.Error);
         }
-
-        var lastApplication = await _initial.GetLastApplication();
-        var applicationId = lastApplication.Id;
-
-        _nav.NavigateTo($"/application/create/{applicationId}");
     }
 
 

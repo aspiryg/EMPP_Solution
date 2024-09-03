@@ -8,6 +8,7 @@
 @inject IWorkHistoryRepo _work
 @inject ISkillRepo _skill
 @inject IInitialStage _main
+@inject IWorkAchievement _workAchievement
 @inject IJSRuntime _js
 @inject NavigationManager _nav
 @inject ISnackbar _snackbar
@@ -51,66 +52,91 @@ else
                 <MudPaper Elevation="4" Class="p-3">
                     <MudGrid Justify="Justify.SpaceBetween">
                         <MudItem>
-                            <MudText Typo="Typo.h5">Application: @Application.FirstName @Application.LastName</MudText>
+                            <MudText Typo="Typo.h5">Applicant: @($"{Application.FirstName} {Application.LastName}")</MudText>
                         </MudItem>
                         <MudItem>
                             <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="AddWork">Add Work</MudButton>
                         </MudItem>
                     </MudGrid>
-                    <MudTable Items="@WorkHistories" Dense="true" Hover="true" Bordered="true" Striped="true">
-                        <ToolBarContent>
-                            <MudText Typo="Typo.h6">Work History</MudText>
-                            <MudSpacer />
-                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                        </ToolBarContent>
-                        <HeaderContent>
-                            <MudTh></MudTh>
-                            <MudTh>Company Name</MudTh>
-                            <MudTh>Position</MudTh>
-                            <MudTh>Start Date</MudTh>
-                            <MudTh>End Date</MudTh>
-                            <MudTh>Skills</MudTh>
-                            <MudTh></MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>
-                                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" Color="Color.Error" OnClick="() => DeleteWorkHistory(context.Id)" />
-                            </MudTd>
-                            <MudTd>@context.CompanyName</MudTd>
-                            <MudTd>@context.Position</MudTd>
-                            <MudTd>@context.StartDate.Value.ToString("d")</MudTd>
-                            <MudTd>@context.EndDate.Value.ToString("d")</MudTd>
-                            <MudTd>
-                                @foreach (var item in context.Skills)
+
+                </MudPaper>
+                @foreach (var item in WorkHistories)
+                {
+                    <MudDivider DividerType="DividerType.FullWidth" Class="m-2" />
+                    <MudCard Elevation="4" Class="p-3">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudAvatar Color="Color.Secondary">I</MudAvatar>
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Position: @item.Position</MudText>
+                                <MudText Typo="Typo.caption">Company: @item.CompanyName</MudText> | <MudText Typo="Typo.caption">From: @item.StartDate.Value.ToString("d") To: @item.EndDate.Value.ToString("d")</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" OnClick="() => DeleteWorkHistory(item.Id)" Color="Color.Default" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudGrid Justify="Justify.SpaceBetween">
+                                <MudItem>
+                                    <MudText Class="text-decoration-underline" Typo="Typo.body1">Key Achievements</MudText>
+                                </MudItem>
+                                <MudItem>
+                                    <MudIconButton Icon="@Icons.Material.Filled.AddCircle" OnClick="() => AddAchievement(item.Id)" Color="Color.Default" />
+                                </MudItem>
+                            </MudGrid>
+                            @foreach (var achievement in item.WorkAchievements)
+                            {
+                                <MudGrid>
+                                    <MudItem>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => EditAchievement(item.Id, achievement.Id)" Color="Color.Default" />
+                                    </MudItem>
+                                    <MudItem>
+                                        <MudText Typo="Typo.body2">@achievement.AchievementName</MudText>
+                                        <MudText Typo="Typo.caption">@achievement.AchievementDescription</MudText>
+                                    </MudItem>
+                                </MudGrid>
+                            }
+                        </MudCardContent>
+                        <MudCardContent>
+                            <MudGrid Justify="Justify.SpaceBetween">
+                                <MudItem>
+                                    <MudText Class="text-decoration-underline" Typo="Typo.body1">Skills</MudText>
+                                </MudItem>
+                                <MudItem>
+                                    <MudIconButton Icon="@Icons.Material.Filled.AddCircle" OnClick="() => AddSkill(item.Id)" Color="Color.Default" />
+                                </MudItem>
+                            </MudGrid>
+                            @foreach (var skill in item.Skills)
+                            {
+                                //switch color based on skill level
+                                var color = skill.SkillLevel switch
                                 {
-                                    //switch color based on skill level
-                                    var color = item.SkillLevel switch
-                                    {
-                                        "Beginner" => MudBlazor.Color.Error,
-                                        "Intermediate" => MudBlazor.Color.Warning,
-                                        "Advanced" => MudBlazor.Color.Success,
-                                        _ => MudBlazor.Color.Primary
-                                    };
+                                    "Beginner" => MudBlazor.Color.Error,
+                                    "Intermediate" => MudBlazor.Color.Warning,
+                                    "Advanced" => MudBlazor.Color.Success,
+                                    _ => MudBlazor.Color.Primary
+                                };
 
 
-                                    <MudChip T="string" Color="color" OnClick="() => EditSkill(context.Id,item.Id)">@item.SkillName</MudChip>
-                                }
-                            </MudTd>
-                            <MudTd>
-                                <MudButton Variant="MudBlazor.Variant.Text" Color="Color.Warning" OnClick="() => AddSkill(context.Id)">Add Skill</MudButton>
-                            </MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                </MudPaper>
-                @*Next Button*@
-                <MudPaper Elevation="4" Class="p-3 mt-3">
-                    <MudGrid Justify="Justify.FlexEnd">
-                        <MudItem>
-                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/language-data/{Id}" )'>Next</MudButton>
-                        </MudItem>
-                    </MudGrid>
-                </MudPaper>
-   
+                                <MudChip T="string" Color="color" OnClick="() => EditSkill(item.Id,skill.Id)">@skill.SkillName</MudChip>
+                            }
+                        </MudCardContent>
+                        <MudCardActions>
+
+                        </MudCardActions>
+
+                    </MudCard>
+                    <MudDivider DividerType="DividerType.FullWidth" Class="m-2" />
+                    <MudPaper Elevation="4" Class="p-3 mt-3">
+                        <MudGrid Justify="Justify.FlexEnd">
+                            <MudItem>
+                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/language-data/{Id}" )'>Next</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                }
+
             </div>
         </div>
     </main>
@@ -130,6 +156,7 @@ else
 
     public IEnumerable<WorkHistoryDTO> WorkHistories = new List<WorkHistoryDTO>();
     public IEnumerable<SkillDTO> Skills = new List<SkillDTO>();
+    public IEnumerable<WorkAchievementDTO> WorkAchievements = new List<WorkAchievementDTO>();
 
     public InitialStageDTO Application { get; set; } = new InitialStageDTO();
 
@@ -150,6 +177,7 @@ else
     {
         WorkHistories = await _work.GetWorkHistoriesByAppIdAsync(Id);
         Skills = await _skill.GetAll();
+        WorkAchievements = await _workAchievement.GetAllAsync();
     }
 
     private async Task DeleteWorkHistory(int id)
@@ -227,6 +255,53 @@ else
         {
             await LoadWorkHistory();
             _snackbar.Add("Skill Edited", Severity.Success);
+        }
+
+    }
+
+    // Add Achievement
+    private async Task AddAchievement(int id)
+    {
+        var parameters = new DialogParameters<AddWorkAchievement>
+        {
+            { x => x.WorkId, id},
+            { x => x.Color, Color.Error },
+            { x => x.IsNew, true }
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddWorkAchievement>("Add Achievement", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadWorkHistory();
+            _snackbar.Add("Achievement Added", Severity.Success);
+        }
+
+    }
+
+    // Edit Achievement
+    private async Task EditAchievement(int id, int achievementId)
+    {
+        var parameters = new DialogParameters<AddWorkAchievement>
+        {
+            { x => x.WorkId, id},
+            { x => x.Color, Color.Error },
+            { x => x.IsNew, false },
+            { x => x.WorkAcievementID, achievementId}
+        };
+
+        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddWorkAchievement>("Edit Achievement", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadWorkHistory();
+            _snackbar.Add("Achievement Edited", Severity.Success);
         }
 
     }

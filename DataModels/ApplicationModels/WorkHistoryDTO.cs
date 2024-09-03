@@ -47,5 +47,8 @@ namespace DataModels.ApplicationModels
 
         // Navigation Property for Skill
         public ICollection<SkillDTO> Skills { get; set; } = [];
+
+        // Navigation Property for WorkAchievement
+        public ICollection<WorkAchievementDTO> WorkAchievements { get; set; } = [];
     }
 }

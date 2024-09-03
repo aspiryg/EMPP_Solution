@@ -59,7 +59,7 @@ else
                     <MudTd>@context.CreatedDate.ToString("d")</MudTd>
                     <MudTd>
                         <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.ViewList" Color="Color.Success" OnClick='() => _nav.NavigateTo($"/myPortal/{context.Id}")' />
-                        <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => ResumeApplication(CurrentUser.Id,context.Id)" />
+                        <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Update" Color="Color.Primary" OnClick="() => ResumeApplication(CurrentUser.Id,context.Id)" />
                         <MudIconButton Icon="@MudBlazor.Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteApplication(context.Id)" />
                     </MudTd>
                 </RowTemplate>
@@ -109,7 +109,7 @@ else
 
     private void ResumeApplication(string UserId, int ApplicationId)
     {
-        _nav.NavigateTo($"/myPortal/{ApplicationId}");
+        _nav.NavigateTo($"/intake/{UserId}&{ApplicationId}");
     }
 
     private async void DeleteApplication(int ApplicationId)
@@ -118,7 +118,8 @@ else
         if (confirm)
         {
             await _initial.DeleteApplication(ApplicationId);
-            Applications = await _initial.GetAllApplicationsByUserId(CurrentUser.Id);
+            var apps = await _initial.GetAllApplicationsByUserId(CurrentUser.Id);
+            Applications = apps.Where(x => x.IsDeleted == false);
         }
     }
 }

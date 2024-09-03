@@ -14,6 +14,7 @@ namespace EMPP_Server.Infrastructure.AutoMapper
             CreateMap<InitialStage, InitialStageDTO>().ReverseMap();
             CreateMap<LanguageTest, LanguageTestDTO>().ReverseMap();
             CreateMap<LanguageData, LanguageDataDTO>().ReverseMap();
+            CreateMap<WorkAchievement, WorkAchievementDTO>().ReverseMap();
         }
     }
 }
