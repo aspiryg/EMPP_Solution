@@ -17,8 +17,8 @@
             <MudText Typo="Typo.h5">Start Application</MudText>
         </MudItem>
         <MudItem>
-            
-            <MudButton Disabled="@(Application.ApplicationType == null || Application.ApplicationType == string.Empty)" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/intake")'>Next</MudButton>
+
+            <MudButton Disabled="@(Application.ApplicationType == null || Application.ApplicationType == string.Empty)" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo(GetRoute().ToString())'>Next</MudButton>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -26,58 +26,101 @@
 
 <MudPaper Elevation="4" Class="p-3">
 
-        <MudGrid Justify="Justify.Center">
-            <MudItem>
-                @*What Kind of application do you want to apply for*@
-                <MudText Typo="Typo.h6">What Kind of application do you want to apply for?</MudText>
-            </MudItem>
-        </MudGrid>
-        <MudGrid Justify="Justify.Center">
-            <MudItem>
-                <MudChipSet Size="Size.Large" T="string" SelectionMode="SelectionMode.ToggleSelection" CheckMark @bind-SelectedValue="Application.ApplicationType">
-                    <MudChip Text="Volunteer Application" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" />
-                    <MudChip Text="Immigration Application" Variant="MudBlazor.Variant.Filled" Color="Color.Success" />
-                    <MudChip Text="Both" Variant="MudBlazor.Variant.Filled" Color="Color.Info" />
-                </MudChipSet>
-            </MudItem>
-        </MudGrid>
-        <MudDivider DividerType="DividerType.Middle" Class="my-2" />
-        <MudGrid Justify="Justify.Center">
-            <MudItem>
-                @if (Application.ApplicationType == "Volunteer Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null || Application.ApplicationType == "Both")
-                {
-                    <MudCard Elevation="1" Class="p-3">
-                        <MudCardHeader>
-                            <MudAvatar Color="Color.Primary">
-                                <MudIcon Icon="@MudBlazor.Icons.Material.Filled.Person" />
-                            </MudAvatar>
-                            <MudDivider DividerType="DividerType.Middle" />
-                            <MudText Typo="Typo.h6">Volunteer Application</MudText>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudText Typo="Typo.body1">The Volunteer Application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudText>
-                            <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudAlert>
-                        </MudCardContent>
-                    </MudCard>
-                }
-                @if (Application.ApplicationType == "Immigration Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null || Application.ApplicationType == "Both")
-                {
-                    <MudCard Elevation="1" Class="p-3">
-                        <MudCardHeader>
-                            <MudAvatar Color="Color.Primary">
-                                <MudIcon Icon="@MudBlazor.Icons.Material.Filled.TravelExplore" />
-                            </MudAvatar>
-                            <MudDivider DividerType="DividerType.Middle" />
-                            <MudText Typo="Typo.h6">Immigration Application</MudText>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudText Typo="Typo.body1"> The Migration Application is for individuals who want to immigrate to Canada.</MudText>
-                            <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to immigrate to Canada.</MudAlert>
-                        </MudCardContent>
-                    </MudCard>
-                }
-            </MudItem>
-        </MudGrid>
+    <MudGrid Justify="Justify.Center">
+        <MudItem>
+            @*What Kind of application do you want to apply for*@
+            <MudText Typo="Typo.h6">What Kind of application do you want to apply for?</MudText>
+        </MudItem>
+    </MudGrid>
+    <MudGrid Justify="Justify.Center">
+        <MudItem>
+            <MudChipSet Size="Size.Large" T="string" SelectionMode="SelectionMode.ToggleSelection" CheckMark @bind-SelectedValue="Application.ApplicationType">
+                <MudChip Text="Volunteer Application" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" />
+                <MudChip Text="Immigration Application" Variant="MudBlazor.Variant.Filled" Color="Color.Success" />
+                <MudChip Text="Mixed Application" Variant="MudBlazor.Variant.Filled" Color="Color.Info" />
+            </MudChipSet>
+        </MudItem>
+    </MudGrid>
+    <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+    <MudGrid Justify="Justify.Center">
+        <MudItem>
+            @if (Application.ApplicationType == "Volunteer Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null)
+            {
+                <MudCard Elevation="1" Class="p-3">
+                    <MudCardHeader>
+                        <MudAvatar Color="Color.Primary">
+                            <MudIcon Icon="@MudBlazor.Icons.Material.Filled.Person" />
+                        </MudAvatar>
+                        <MudDivider DividerType="DividerType.Middle" />
+                        <MudText Typo="Typo.h6">Volunteer Application</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body1">The Volunteer Application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudText>
+                        <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to volunteer their time and skills to help refugees and other displaced people.</MudAlert>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudGrid Justify="Justify.FlexEnd">
+                            <MudItem>
+                                <MudButton Variant="MudBlazor.Variant.Outlined" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/Volunteer/Add")'>Make a difference</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardActions>
+                </MudCard>
+                <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+            }
+            @if (Application.ApplicationType == "Immigration Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null)
+            {
+                <MudCard Elevation="1" Class="p-3">
+                    <MudCardHeader>
+                        <MudAvatar Color="Color.Primary">
+                            <MudIcon Icon="@MudBlazor.Icons.Material.Filled.TravelExplore" />
+                        </MudAvatar>
+                        <MudDivider DividerType="DividerType.Middle" />
+                        <MudText Typo="Typo.h6">Immigration Application</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body1"> The Migration Application is for individuals who want to immigrate to Canada.</MudText>
+                        <MudAlert Severity="Severity.Info">Please note that this application is for individuals who want to immigrate to Canada.</MudAlert>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudGrid Justify="Justify.FlexEnd">
+                            <MudItem>
+                                <MudButton Variant="MudBlazor.Variant.Outlined" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/intake")'>Start your journey</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardActions>
+                </MudCard>
+                <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+            }
+            @if (Application.ApplicationType == "Mixed Application" || Application.ApplicationType == string.Empty || Application.ApplicationType == null)
+            {
+                <MudCard Elevation="1" Class="p-3">
+                    <MudCardHeader>
+                        <MudAvatar Color="Color.Primary">
+                            <MudIcon Icon="@MudBlazor.Icons.Material.Filled.CallSplit" />
+                        </MudAvatar>
+                        <MudDivider DividerType="DividerType.Middle" />
+                        <MudText Typo="Typo.h6">Mixed Application</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body1">
+                            The Mixed Application is for individuals who want to volunteer their time and skills to help refugees and other displaced people and also want to immigrate to Canada.
+                        </MudText>
+                        <MudAlert Severity="Severity.Info">
+                            Please note that this application is for individuals who want to volunteer their time and skills to help refugees and other displaced people and also want to immigrate to Canada.
+                        </MudAlert>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudGrid Justify="Justify.FlexEnd">
+                            <MudItem>
+                                <MudButton Variant="MudBlazor.Variant.Outlined" Color="Color.Primary" OnClick='() => _nav.NavigateTo("/intake")'>Make a difference and start your journey</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardActions>
+                </MudCard>
+            }
+        </MudItem>
+    </MudGrid>
 
 </MudPaper>
 
@@ -104,5 +147,26 @@
                 CurrentUser = userObj;
             }
         }
+    }
+
+    // The rout to apply for a volunteer application or for immigration application
+
+    private string AppRoute = string.Empty;
+
+    private string GetRoute()
+    {
+        if (Application.ApplicationType == "Volunteer Application")
+        {
+            return "/Volunteer/Add";
+        }
+        else if (Application.ApplicationType == "Immigration Application")
+        {
+            return "/intake";
+        }
+        else if (Application.ApplicationType == "Mixed Application")
+        {
+            return "/intake";
+        }
+        return string.Empty;
     }
 }

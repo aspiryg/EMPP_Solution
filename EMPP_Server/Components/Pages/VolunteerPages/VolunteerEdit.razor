@@ -1,0 +1,280 @@
+﻿@page "/Volunteer/Add"
+@page "/Volunteer/Edit/{id:int}"
+@using DataModels.ApplicationModels
+@using EMPP_Server.Data
+@using EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
+@using EMPP_Server.Infrastructure.Repositories.IRepo
+@using Microsoft.AspNetCore.Identity
+
+@inject IVolunteer _volunteer
+@inject NavigationManager _nav
+@inject ISnackbar _snackbar
+@inject IJSRuntime _js
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
+@inject IGeneInfo _geneInfo
+
+<PageTitle>@Title</PageTitle>
+
+<MudPaper Elevation="4" Class="p-3">
+    <MudCardHeader>
+        <MudAvatar Color="Color.Primary">
+            <MudIcon Size="Size.Small" Icon="@MudBlazor.Icons.Material.Filled.Man" />
+        </MudAvatar>
+        <MudDivider DividerType="DividerType.Middle" />
+        <MudText Typo="Typo.h4">Volunteer Application</MudText>
+    </MudCardHeader>
+</MudPaper>
+<MudDivider DividerType="DividerType.Middle" Class="my-2" />
+
+
+<MudContainer>
+    <MudPaper Elevation="4" Class="p-3">
+        <EditForm Model="Volunteer" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <RadzenFieldset Text="Name">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="First Name" @bind-Value="Volunteer.FirstName" Required="true" />
+                            <ValidationMessage For="@(() => Volunteer.FirstName)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Last Name" @bind-Value="Volunteer.LastName" Required="true" />
+                            <ValidationMessage For="@(() => Volunteer.LastName)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Middle Name" @bind-Value="Volunteer.MiddleName" />
+                            <ValidationMessage For="@(() => Volunteer.MiddleName)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+            <br />
+            <RadzenFieldset Icon="alternate_email  " IconColor="@Radzen.Colors.Primary">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Email" @bind-Value="Volunteer.Email" Required="true" />
+                            <ValidationMessage For="@(() => Volunteer.Email)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Phone Number" @bind-Value="Volunteer.Phone" Required="true" InputMode="InputMode.numeric" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Phone" AdornmentColor="Color.Primary" />
+                            <ValidationMessage For="@(() => Volunteer.Phone)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="WhatsApp Number" @bind-Value="Volunteer.WhatsApp" Required="false" InputMode="InputMode.numeric" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Smartphone" AdornmentColor="Color.Primary" />
+                            <ValidationMessage For="@(() => Volunteer.WhatsApp)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+            <br />
+            <RadzenFieldset Icon="home  " IconColor="@Radzen.Colors.Primary">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Address Line 1" @bind-Value="Volunteer.AddressLine1" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.AddressLine1)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Address Line 2" @bind-Value="Volunteer.AddressLine2" />
+                            <ValidationMessage For="@(() => Volunteer.AddressLine2)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="City" @bind-Value="Volunteer.City" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.City)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="State" @bind-Value="Volunteer.State" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.State)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Country" @bind-Value="Volunteer.Country" Required="true" />
+                            <ValidationMessage For="@(() => Volunteer.Country)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Zip Code" @bind-Value="Volunteer.PostalCode" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.PostalCode)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+            <br />
+            <RadzenFieldset Icon="work  " IconColor="@Radzen.Colors.Primary">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Main Occupation" @bind-Value="Volunteer.MainOccupation" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.MainOccupation)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudNumericField Label="Years Of Experience" @bind-Value="Volunteer.YearsOfExperience" Required="false" Min="0" />
+                            <ValidationMessage For="@(() => Volunteer.YearsOfExperience)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Highest Education" @bind-Value="Volunteer.HighestEducation" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.HighestEducation)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudSelect T="string" @bind-Value="Volunteer.Language" Label="Applicant Language" Adornment="Adornment.End" AdornmentIcon="@MudBlazor.Icons.Material.Filled.Language" AdornmentColor="Color.Primary">
+                                <MudSelectItem Value="string.Empty" Disabled="true">Select Language</MudSelectItem>
+                                @foreach (var item in Languages)
+                                {
+                                    <MudSelectItem Value="@item">@item</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+            <br />
+            <RadzenFieldset Icon="volunteer_activism  " Text="Volunteering" IconColor="@Radzen.Colors.Primary">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudSelect T="string" @bind-Value="Volunteer.VolunteerArea" Label="Volunteer Area" Adornment="Adornment.End" AdornmentIcon="@MudBlazor.Icons.Material.Filled.Work" AdornmentColor="Color.Primary">
+                                <MudSelectItem Value="string.Empty" Disabled="true">Select Volunteer Area</MudSelectItem>
+                                @foreach (var item in VolunteerAreas)
+                                {
+                                    <MudSelectItem Value="@item">@item</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </RadzenColumn>
+                        @if (Volunteer.VolunteerArea == "Other")
+                        {
+                            <RadzenColumn SizeSM="12" SizeMD="6">
+                                <MudTextField T="string" Label="Other Volunteer Area" Required="false" />
+                            </RadzenColumn>
+                        }
+                    </RadzenRow>
+                    <RadzenRow AlignItems="Radzen.AlignItems.Center">
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Volunteer Skills" @bind-Value="Volunteer.VolunteerSkills" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.VolunteerSkills)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudNumericField Min="0" Label="Weekly Volunteering Hours" @bind-Value="Volunteer.WeeklyVolunteeringHours" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.WeeklyVolunteeringHours)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Volunteering Availability" @bind-Value="Volunteer.VolunteeringAvailability" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.VolunteeringAvailability)" />
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="12" SizeMD="6">
+                            <MudTextField Label="Why do you want to volunteer?" @bind-Value="Volunteer.VolunteeringReason" Required="false" />
+                            <ValidationMessage For="@(() => Volunteer.VolunteeringReason)" />
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+            <br />
+            <MudPaper Elevation="4" Class="p-3">
+                <MudGrid Justify="Justify.FlexEnd">
+                    <MudItem>
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Text" Color="Color.Primary">Save</MudButton>
+                        <MudButton ButtonType="MudBlazor.ButtonType.Button" Variant="MudBlazor.Variant.Text" Color="Color.Secondary" OnClick="GoBack">Cancel</MudButton>
+                        @if (IsEdit)
+                        {
+                            <MudButton ButtonType="MudBlazor.ButtonType.Button" Variant="MudBlazor.Variant.Text" Color="Color.Error" OnClick="Delete">Delete</MudButton>
+                        }
+                        </MudItem>
+                </MudGrid>
+                </MudPaper>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public bool IsEdit => Id > 0;
+    public string Title => IsEdit ? "Edit Application" : "Add Application";
+    public bool IsLoading { get; set; } = false;
+
+    // Mask for International Phone Number
+
+
+    public VolunteerDTO Volunteer { get; set; } = new VolunteerDTO();
+    private ApplicationUser _currentUser = new ApplicationUser();
+
+
+
+    private async Task LoadData()
+    {
+        if (IsEdit)
+        {
+            Volunteer = await _volunteer.GetByIdAsync(Id);
+        }
+    }
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userObj = await _userManager.FindByEmailAsync(user.Identity.Name);
+            if (userObj != null)
+            {
+                _currentUser = userObj;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrentUser();
+        await LoadData();
+        await GetLanguages();
+    }
+
+    private async Task Save()
+    {
+        if (IsEdit)
+        {
+            await _volunteer.UpdateAsync(Volunteer);
+        }
+        else
+        {
+            Volunteer.UserId = _currentUser.Id;
+            await _volunteer.CreateAsync(Volunteer);
+        }
+        _snackbar.Add("Application saved successfully", Severity.Success);
+        _nav.NavigateTo("/Volunteer");
+    }
+
+    // Delete with confirmation
+    private async Task Delete()
+    {
+        var confirm = await _js.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirm)
+        {
+            await _volunteer.DeleteAsync(Id);
+            _snackbar.Add("Application deleted successfully", Severity.Success);
+            _nav.NavigateTo("/Volunteer");
+        }
+    }
+
+
+    private void GoBack()
+    {
+        _nav.NavigateTo("/");
+    }
+
+    // Get language list
+    private List<string> Languages = new List<string>();
+
+    private async Task GetLanguages()
+    {
+        Languages = await _geneInfo.GetALLLanguages();
+    }
+
+    // List of volunteer areas
+    private List<string> VolunteerAreas = new List<string> { "Event Management", "Fundraising", "Marketing", "Social Media", "Web Development", "Graphic Design", "Content Writing", "Photography", "Videography", "Other" };
+}

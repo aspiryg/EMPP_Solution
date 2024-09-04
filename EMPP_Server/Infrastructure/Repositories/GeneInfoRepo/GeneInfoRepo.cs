@@ -69,6 +69,9 @@ namespace EMPP_Server.Infrastructure.Repositories.GeneInfoRepo
                 }
             }
 
+            // Remove duplicates
+            languageList = languageList.Distinct().ToList();
+
             // Catch and try to handle exceptions
             try
             {

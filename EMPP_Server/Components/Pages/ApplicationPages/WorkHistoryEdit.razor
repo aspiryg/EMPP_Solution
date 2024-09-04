@@ -127,16 +127,15 @@ else
                         </MudCardActions>
 
                     </MudCard>
-                    <MudDivider DividerType="DividerType.FullWidth" Class="m-2" />
-                    <MudPaper Elevation="4" Class="p-3 mt-3">
-                        <MudGrid Justify="Justify.FlexEnd">
-                            <MudItem>
-                                <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/language-data/{Id}" )'>Next</MudButton>
-                            </MudItem>
-                        </MudGrid>
-                    </MudPaper>
                 }
-
+                <MudDivider DividerType="DividerType.FullWidth" Class="m-2" />
+                <MudPaper Elevation="4" Class="p-3 mt-3">
+                    <MudGrid Justify="Justify.FlexEnd">
+                        <MudItem>
+                            <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick='() => _nav.NavigateTo($"/language-data/{Id}" )'>Next</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
             </div>
         </div>
     </main>

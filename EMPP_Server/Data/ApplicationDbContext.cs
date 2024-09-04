@@ -15,6 +15,7 @@ namespace EMPP_Server.Data
         public DbSet<LanguageTest> LanguageTests { get; set; }
         public DbSet<LanguageData> LanguageData { get; set; }
         public DbSet<WorkAchievement> WorkAchievements { get; set; }
+        public DbSet<Volunteer> Volunteers { get; set; }
 
         //internal Action<IMappingOperationOptions<object, void>> FindAsync(WorkHistoryDTO workHistory)
         //{

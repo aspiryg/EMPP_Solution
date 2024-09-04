@@ -61,6 +61,7 @@ builder.Services.AddScoped<ISkillRepo, SkillRepo>();
 builder.Services.AddScoped<ILanguageData, LanguageDataRepo>();
 builder.Services.AddScoped<ILanguageTestRepo, LanguageTestRepo>();
 builder.Services.AddScoped<IWorkAchievement, WorkAchievementRepo>();
+builder.Services.AddScoped<IVolunteer, VolunteerRepo>();
 
 // Add services.
 builder.Services.AddScoped<IGeneInfo, GeneInfoRepo>();
